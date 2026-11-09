@@ -10,3 +10,11 @@ test('badge thresholds match the intended chapters',async()=>{const {badges}=awa
 
 test('new collapse triggers use safe deterministic target coordinates',()=>{const planned=levels.slice(0,10).flatMap((l,i)=>l.triggers.filter(t=>t[0]==='collapse').map(t=>({l,i,t})));assert.equal(planned.length,3);for(const {l,i,t} of planned){assert.ok(t[1]<t[2],`level ${i+1}: collapse has no reaction distance`);assert.ok(t[2]+1<l.width-2,`level ${i+1}: collapse outside level`)}});
 test('all finalized chapter names remain unchanged',()=>assert.deepEqual(chapters.map(c=>c[0]),['A Simple Beginning','Minor Inconveniences','Nothing to See Here','Working as Intended','Please Proceed','A Matter of Timing','Trust the Process','Perfectly Safe','The Usual Route','Almost Finished','Further Instructions','Nothing Personal','One Last Thing','Final Preparations','The Exit']));
+
+test('first three levels use distinct environment puzzles',()=>{
+ assert.equal(levels[0].doorMode,'shy');
+ assert.deepEqual(levels[1].bridge,{from:20,to:23,plate:17});
+ assert.deepEqual(levels[2].roller,{trigger:14,spawn:10,barrier:31});
+ assert.ok(levels[2].walls.includes(31));
+ assert.ok(levels[0].width>24&&levels[1].width>24&&levels[2].width>24);
+});
