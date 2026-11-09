@@ -57,7 +57,18 @@ function physics(dt){if(!player||dead||finished||paused)return;t+=dt;const p=pla
  for(const s of solids())if(overlaps(p,s)){if(p.vy>=0&&oldBottom<=s.y+8){p.y=s.y-p.h;p.vy=0;p.grounded=true;if(!beforeGrounded)p.squash=.1;if(s.kind==='crumble'&&s.timer<0)s.timer=.43;if(s.kind===undefined&&o.movers.includes(s))p.x+=s.x-s.prevX}else if(p.vy<0){p.y=s.y+s.h;p.vy=0}else{if(p.x+p.w/2<s.x+s.w/2)p.x=s.x-p.w;else p.x=s.x+s.w}}
  for(const c of o.crumble)if(c.timer>=0&&!c.fallen){c.timer-=dt;if(c.timer<=0){c.fallen=true;sound(120,.07)}}
  for(const sw of o.switches){if(!sw.active&&overlaps(p,sw)){sw.active=true;o.walls.filter(w=>w.x===sw.target*TILE).forEach(w=>w.opened=true);say('CLICK. SOMETHING MOVED.',1);sound(800,.1)}}
- for(const tr of o.triggers){if(!tr.done&&p.x>tr.x){tr.done=true;tr.clock=t;if(tr.kind==='spike'){o.spikes.push({...range(tr.target+8,FLOOR-22,24,22),born:t+.22});say('HEARD THAT?',.7)}if(tr.kind==='chase'){o.chaser={x:Math.max(0,p.x-125),y:FLOOR-28,w:24,h:28};say('KEEP MOVING.',.9)}if(tr.kind==='delay'){const f={x:tr.target+2,y:40,w:36,h:35,startY:40,active:true,triggered:true,vy:0};o.fallers.push(f);say('HEADS UP.',.8)}}}
+ for(const tr of o.triggers){if(!tr.done&&p.x>tr.x){tr.done=true;tr.clock=t;if(tr.kind==='collapse'){
+ const first=Math.floor(tr.target/TILE);
+ for(let n=first;n<first+2;n++){
+  const idx=o.floors.findIndex(f=>f.x===n*TILE);
+  if(idx>=0)o.floors.splice(idx,1);
+  const existing=o.crumble.find(c=>c.x===n*TILE);
+  if(existing){existing.timer=.4;existing.fallen=false}
+  else o.crumble.push(solid(n*TILE,FLOOR,TILE,H-FLOOR,'crumble',{timer:.4,fallen:false}));
+ }
+ say('FLOOR CONDITION UPDATED.',.85);sound(190,.09,'triangle');
+}
+if(tr.kind==='spike'){o.spikes.push({...range(tr.target+8,FLOOR-22,24,22),born:t+.22});say('HEARD THAT?',.7)}if(tr.kind==='chase'){o.chaser={x:Math.max(0,p.x-125),y:FLOOR-28,w:24,h:28};say('KEEP MOVING.',.9)}if(tr.kind==='delay'){const f={x:tr.target+2,y:40,w:36,h:35,startY:40,active:true,triggered:true,vy:0};o.fallers.push(f);say('HEADS UP.',.8)}}}
  for(const f of o.fallers){if(!f.triggered&&Math.abs(p.x-f.x)<90){f.triggered=true;f.active=true;sound(130,.07)}if(f.active){f.vy=Math.min(520,f.vy+1100*dt);f.y=Math.min(FLOOR-f.h,f.y+f.vy*dt);if(overlaps(p,f))die()}}
  if(o.chaser){o.chaser.x+=115*dt;if(overlaps(p,o.chaser))die()}
  for(const sp of o.spikes)if((sp.born===undefined||t>=sp.born)&&overlaps(p,sp))die();
@@ -69,6 +80,12 @@ function render(){if(screen!=='game'||!player)return;const p=player,o=objects,ch
  const drawRect=(r,color)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(r.x),Math.round(r.y),r.w,r.h)};
  for(const f of o.floors){drawRect(f,'#606e7b');ctx.fillStyle='#9aa8ad';ctx.fillRect(f.x,f.y,40,5)}
  for(const b of o.blink){const on=Math.sin(t*2.5*Math.PI+b.phase*Math.PI*2)>=-.3;ctx.globalAlpha=on?1:.17;drawRect(b,'#b7a4e0');ctx.fillStyle='#e2d5ff';ctx.fillRect(b.x,b.y,40,5);ctx.globalAlpha=1}
+ for(const tr of o.triggers)if(tr.kind==='collapse'&&!tr.done){
+ const tx=tr.target;
+ ctx.fillStyle='#b7a4e0';ctx.globalAlpha=.55;
+ for(let j=0;j<2;j++){ctx.fillRect(tx+j*TILE+5,FLOOR-2,30,2)}
+ ctx.globalAlpha=1;
+}
  for(const c of o.crumble){if(c.fallen)continue;drawRect(c,c.timer>=0?'#a8765f':'#826d6c');ctx.fillStyle='#d6b4a2';ctx.fillRect(c.x,c.y,40,5);ctx.strokeStyle='#352f3e';ctx.beginPath();ctx.moveTo(c.x+10,c.y+8);ctx.lineTo(c.x+24,c.y+20);ctx.lineTo(c.x+30,c.y+27);ctx.stroke()}
  for(const m of o.movers){drawRect(m,'#e5bd74');ctx.fillStyle='#fff0ba';ctx.fillRect(m.x,m.y,m.w,4)}
  for(const wall of o.walls)if(!wall.opened){drawRect(wall,'#aa6867');ctx.strokeStyle='#f9a89c';ctx.strokeRect(wall.x+3,wall.y+3,wall.w-6,wall.h-6)}
