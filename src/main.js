@@ -1,16 +1,27 @@
 import {levels,chapters,badges,validateLevels} from './levels.js';
 const $=id=>document.getElementById(id), C=$('canvas'),ctx=C.getContext('2d');
-const W=960,H=540, FLOOR=468, TILE=40, PX=24,PY=32, DT=1/120;
+let W=960;const H=540, FLOOR=468, TILE=40, PX=24,PY=32, DT=1/120;
 const storeKey='unfair-game-v1';
 const load=()=>{try{const s=JSON.parse(localStorage.getItem(storeKey)||'{}');return {unlocked:Math.max(1,Math.min(60,Number(s.unlocked)||1)),deaths:Math.max(0,Number(s.deaths)||0),sound:s.sound!==false,motion:s.motion!==false,badges:Array.isArray(s.badges)?s.badges:[]}}catch{return {unlocked:1,deaths:0,sound:true,motion:true,badges:[]}}};
 let save=load(),camera=0,screen='menu',levelIndex=0,level=null,player=null,objects=null,t=0,dead=false,finished=false,paused=false,last=0,acc=0,toastUntil=0,toastText='',flash=0,shake=0;
 const keys={left:false,right:false,jump:false};
+// Canvas coordinates track the actual display aspect ratio. World tile dimensions never stretch.
+function resizeGame(){
+ const wrap=$('game-wrap');const bounds=wrap.getBoundingClientRect();
+ if(!bounds.width||!bounds.height)return;
+ const next=Math.max(290,Math.round(H*bounds.width/bounds.height));
+ if(C.width!==next||C.height!==H){W=next;C.width=next;C.height=H;}
+}
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(resizeGame).observe($('game-wrap'));
+window.addEventListener('resize',resizeGame);
+window.visualViewport?.addEventListener('resize',resizeGame);
+
 const persist=()=>{try{localStorage.setItem(storeKey,JSON.stringify(save))}catch{}};
 const range=(x,y,w,h)=>({x,y,w,h});
 const overlaps=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 const sound=(frequency=300,duration=.06,type='sine')=>{if(!save.sound)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const ac=sound.ac||(sound.ac=new AC());if(ac.state==='suspended')ac.resume();const osc=ac.createOscillator(),g=ac.createGain();osc.type=type;osc.frequency.setValueAtTime(frequency,ac.currentTime);osc.frequency.exponentialRampToValueAtTime(Math.max(50,frequency*.65),ac.currentTime+duration);g.gain.setValueAtTime(.07,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+duration);osc.connect(g).connect(ac.destination);osc.start();osc.stop(ac.currentTime+duration)}catch{}};
 function say(message,seconds=1.2){toastText=message;toastUntil=t+seconds;$('toast').textContent=message;$('toast').classList.add('show')}
-function show(name){screen=name;for(const id of ['menu','levels','settings-screen','game','badges-screen','about-screen'])$(id).classList.toggle('hidden',id!==(name==='settings'?'settings-screen':name==='badges'?'badges-screen':name==='about'?'about-screen':name));if(name==='levels')renderLevels();if(name==='badges')renderBadges();if(name==='game'){$('sound').checked=save.sound}else{for(const k of Object.keys(keys))keys[k]=false}}
+function show(name){screen=name;for(const id of ['menu','levels','settings-screen','game','badges-screen','about-screen'])$(id).classList.toggle('hidden',id!==(name==='settings'?'settings-screen':name==='badges'?'badges-screen':name==='about'?'about-screen':name));if(name==='levels')renderLevels();if(name==='badges')renderBadges();if(name==='game'){$('sound').checked=save.sound;requestAnimationFrame(resizeGame)}else{for(const k of Object.keys(keys))keys[k]=false}}
 function renderBadges(){const el=$('badges-grid');el.replaceChildren();for(const badge of badges){const earned=save.badges.includes(badge.after)||save.unlocked>badge.after;const item=document.createElement('article');item.className='badge-card'+(earned?'':' locked');const medal=document.createElement('div');medal.className='badge-medal';medal.textContent=earned?badge.mark:'?';const name=document.createElement('h3');name.textContent=earned?badge.name:'???';const caption=document.createElement('p');caption.textContent=earned?badge.line:`Complete Chapter ${badge.after/10} to reveal`;item.append(medal,name,caption);el.append(item)}}
 function renderLevels(){const el=$('chapters');el.replaceChildren();$('unlocked-counter').textContent=`${save.unlocked}/${levels.length} UNLOCKED`;chapters.forEach(([label,diff],ch)=>{const wrap=document.createElement('section');wrap.className='chapter';const head=document.createElement('div');head.className='chapter-head';const heading=document.createElement('h3');heading.textContent=`${String(ch+1).padStart(2,'0')} · ${label}`;const subtitle=document.createElement('span');subtitle.textContent=ch*10>=levels.length?'IN DEVELOPMENT':diff;head.append(heading,subtitle);const tiles=document.createElement('div');tiles.className='tiles';if(ch*10>=levels.length){const p=document.createElement('p');p.textContent='More doors are being built. No shortcuts.';p.style.color='#a5a4b7';tiles.append(p)}else{for(let i=ch*10;i<Math.min((ch+1)*10,levels.length);i++){const b=document.createElement('button');b.className='tile'+(i+1<save.unlocked?' done':i+1===save.unlocked?' next':'');b.textContent=i+1;b.disabled=i+1>save.unlocked;b.setAttribute('aria-label',`Level ${i+1}: ${levels[i].name}${b.disabled?' locked':''}`);b.addEventListener('click',()=>start(i));tiles.append(b)}}wrap.append(head,tiles);el.append(wrap)})}
 const solid=(x,y,w,h,kind='floor',extra={})=>({x,y,w,h,kind,...extra});
@@ -53,8 +64,8 @@ function physics(dt){if(!player||dead||finished||paused)return;t+=dt;const p=pla
  for(const f of o.fake)if(!f.used&&overlaps(p,f)){f.used=true;say('THAT IS NOT THE EXIT.',1.5);sound(170,.13)}
  if(p.y>H+10)die();if(overlaps(p,o.door))win();
  }
-function render(){if(screen!=='game'||!player)return;const p=player,o=objects,chapter=Math.floor(levelIndex/10),colors=['#2a3043','#2c3440','#353043','#2c3840','#34303c','#303344'];ctx.save();ctx.clearRect(0,0,W,H);ctx.fillStyle=colors[chapter];ctx.fillRect(0,0,W,H);
- camera=Math.max(0,Math.min(o.width-W,p.x-W*.38));ctx.translate(-Math.round(camera),0);ctx.fillStyle='#353a50';for(let n=0;n<=level.width;n++){const x=n*40;ctx.fillRect(x,0,1,540)}for(let n=0;n<14;n++)ctx.fillRect(0,n*40,o.width,1);
+function render(){if(screen!=='game'||!player)return;const p=player,o=objects,chapter=Math.floor(levelIndex/10),colors=['#2a3043','#2c3440','#353043','#2c3840','#34303c','#303344'];ctx.save();ctx.clearRect(0,0,W,H);ctx.fillStyle=colors[chapter]||colors[0];ctx.fillRect(0,0,W,H);
+ const goal=Math.max(0,Math.min(Math.max(0,o.width-W),p.x-W*.38));camera+= (goal-camera)*.17;ctx.translate(-Math.round(camera),0);ctx.fillStyle='#353a50';for(let n=0;n<=level.width;n++){const x=n*40;ctx.fillRect(x,0,1,540)}for(let n=0;n<14;n++)ctx.fillRect(0,n*40,o.width,1);
  const drawRect=(r,color)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(r.x),Math.round(r.y),r.w,r.h)};
  for(const f of o.floors){drawRect(f,'#606e7b');ctx.fillStyle='#9aa8ad';ctx.fillRect(f.x,f.y,40,5)}
  for(const b of o.blink){const on=Math.sin(t*2.5*Math.PI+b.phase*Math.PI*2)>=-.3;ctx.globalAlpha=on?1:.17;drawRect(b,'#b7a4e0');ctx.fillStyle='#e2d5ff';ctx.fillRect(b.x,b.y,40,5);ctx.globalAlpha=1}
@@ -79,4 +90,4 @@ window.addEventListener('keydown',e=>{if(screen!=='game')return;if(keyNames[e.co
 window.addEventListener('keyup',e=>{if(keyNames[e.code]){e.preventDefault();if(keyNames[e.code]==='jump')handleJump(false);else keys[keyNames[e.code]]=false}});
 window.addEventListener('blur',()=>{for(const k of Object.keys(keys))keys[k]=false;if(screen==='game'&&!paused&&!finished&&!dead)pause()});
 for(const b of document.querySelectorAll('[data-control]')){const which=b.dataset.control;const down=e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);if(which==='jump')handleJump(true);else keys[which]=true};const up=e=>{e.preventDefault();if(which==='jump')handleJump(false);else keys[which]=false};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up)}
-const errors=validateLevels();if(errors.length)console.error('Level validation failed',errors);show('menu');requestAnimationFrame(frame);
+const errors=validateLevels();if(errors.length)console.error('Level validation failed',errors);show('menu');resizeGame();requestAnimationFrame(frame);
