@@ -1,3 +1,4 @@
+import {updateShyDoor,bridgeActivated,stepRoller} from './mechanics.js';
 import {levels,chapters,badges,validateLevels} from './levels.js';
 const $=id=>document.getElementById(id), C=$('canvas'),ctx=C.getContext('2d');
 let W=960;const H=540, FLOOR=468, TILE=40, PX=24,PY=32, DT=1/120;
@@ -34,8 +35,10 @@ const spikes=def.spikes.map(n=>range(n*TILE+8,FLOOR-22,24,22));
 const fallers=def.fallers.map(n=>({x:n*TILE+2,y:40,w:36,h:35,startY:40,active:false,triggered:false,vy:0}));
 const movers=def.movers.map(([a,b,speed])=>({x:a*TILE,y:FLOOR-58,w:80,h:13,min:a*TILE,max:b*TILE,dir:1,speed:speed*33,prevX:a*TILE}));
 const fake=def.fake.map(n=>({x:n*TILE,y:FLOOR-64,w:31,h:64,used:false}));
+const bridge=def.bridge?{...def.bridge,active:false,plate:{x:def.bridge.plate*TILE+5,y:FLOOR-15,w:30,h:15}}:null;
+const roller=def.roller?{...def.roller,x:def.roller.spawn*TILE,y:FLOOR-40,w:40,h:40,speed:165,active:false,started:false,spent:false}:null;
 const triggers=def.triggers.map(([kind,x,target])=>({kind,x:x*TILE,target:target*TILE,done:false,clock:0}));
-return {floors,crumble,blink,walls,switches,spikes,fallers,movers,fake,triggers,door:range(def.width*TILE-57,FLOOR-62,35,62),width:def.width*TILE,chaser:null};
+return {floors,crumble,blink,walls,switches,spikes,fallers,movers,fake,triggers,door:range(def.width*TILE-57,FLOOR-62,35,62),width:def.width*TILE,chaser:null,bridge,roller,doorMode:def.doorMode,doorMaxX:def.width*TILE-45};
 }
 function start(i){if(i<0||i>=levels.length||i+1>save.unlocked)return;levelIndex=i;level=levels[i];objects=buildLevel(i);player={x:64,y:FLOOR-PY,w:PX,h:PY,vx:0,vy:0,grounded:false,coyote:0,buffer:0,jumpHeld:false,face:1,squash:0};t=0;camera=0;acc=0;dead=false;finished=false;paused=false;flash=0;shake=0;toastUntil=0;$('toast').classList.remove('show');$('overlay').classList.add('hidden');$('chapter-name').textContent=`CHAPTER ${Math.floor(i/10)+1} · ${chapters[Math.floor(i/10)][0]}`;$('level-name').textContent=`${i+1}. ${level.name}`;updateDeaths();show('game');}
 function updateDeaths(){$('death-counter').textContent=`☠ ${save.deaths}`}
@@ -51,7 +54,15 @@ function physics(dt){if(!player||dead||finished||paused)return;t+=dt;const p=pla
  p.vy=Math.min(740,p.vy+1190*dt);
  const activeBlink=b=>Math.sin(t*2.5*Math.PI+b.phase*Math.PI*2)>=-.3;
  for(const m of o.movers){m.prevX=m.x;m.x+=m.dir*m.speed*dt;if(m.x<m.min){m.x=m.min;m.dir=1}if(m.x>m.max){m.x=m.max;m.dir=-1}}
- const solids=()=>[...o.floors,...o.crumble.filter(c=>!c.fallen),...o.blink.filter(activeBlink),...o.movers,...o.walls.filter(w=>!w.opened)];
+ if(o.doorMode==='shy')o.door=updateShyDoor(o.door,p,dt,{maxX:o.doorMaxX});
+ if(o.bridge&&!o.bridge.active&&bridgeActivated(o.bridge.plate,p)){o.bridge.active=true;sound(540,.08,'triangle');}
+ if(o.roller){
+   const ball=o.roller;
+   if(!ball.started&&p.x>=ball.trigger*TILE){ball.started=true;ball.active=true;sound(115,.15,'sawtooth')}
+   if(ball.active){const barrier=o.walls.find(w=>w.x===ball.barrier*TILE);const next=stepRoller(ball,dt,barrier);Object.assign(ball,next);if(ball.spent&&barrier){barrier.opened=true;sound(110,.17,'triangle')}}
+   if(ball.active&&overlaps(p,ball))die();
+ }
+ const solids=()=>[...o.floors,...o.crumble.filter(c=>!c.fallen),...o.blink.filter(activeBlink),...o.movers,...o.walls.filter(w=>!w.opened),...(o.bridge?.active?Array.from({length:o.bridge.to-o.bridge.from},(_,i)=>solid((o.bridge.from+i)*TILE,FLOOR,TILE,H-FLOOR,'bridge')):[])];
  p.x+=p.vx*dt;for(const s of solids())if(overlaps(p,s)){if(p.vx>0)p.x=s.x-p.w;else if(p.vx<0)p.x=s.x+s.w}p.x=Math.max(0,Math.min(o.width-p.w,p.x));
  const oldBottom=p.y+p.h;const beforeGrounded=p.grounded;p.grounded=false;p.y+=p.vy*dt;
  for(const s of solids())if(overlaps(p,s)){if(p.vy>=0&&oldBottom<=s.y+8){p.y=s.y-p.h;p.vy=0;p.grounded=true;if(!beforeGrounded)p.squash=.1;if(s.kind==='crumble'&&s.timer<0)s.timer=.43;if(s.kind===undefined&&o.movers.includes(s))p.x+=s.x-s.prevX}else if(p.vy<0){p.y=s.y+s.h;p.vy=0}else{if(p.x+p.w/2<s.x+s.w/2)p.x=s.x-p.w;else p.x=s.x+s.w}}
@@ -87,6 +98,8 @@ function render(){if(screen!=='game'||!player)return;const p=player,o=objects,ch
  ctx.globalAlpha=1;
 }
  for(const c of o.crumble){if(c.fallen)continue;drawRect(c,c.timer>=0?'#a8765f':'#826d6c');ctx.fillStyle='#d6b4a2';ctx.fillRect(c.x,c.y,40,5);ctx.strokeStyle='#352f3e';ctx.beginPath();ctx.moveTo(c.x+10,c.y+8);ctx.lineTo(c.x+24,c.y+20);ctx.lineTo(c.x+30,c.y+27);ctx.stroke()}
+ if(o.bridge){const b=o.bridge;drawRect(b.plate,b.active?'#86d6b0':'#f1c66e');for(let i=b.from;i<b.to;i++){ctx.globalAlpha=b.active?1:.3;drawRect({x:i*TILE,y:FLOOR,w:TILE,h:6},b.active?'#8fd4b8':'#6a7a8d');ctx.globalAlpha=1}}
+ if(o.roller){const r=o.roller;ctx.save();ctx.fillStyle=r.spent?'#8a847e':'#d99976';ctx.beginPath();ctx.arc(r.x+r.w/2,r.y+r.h/2,r.w/2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#f6c7a7';ctx.lineWidth=4;ctx.stroke();ctx.restore();}
  for(const m of o.movers){drawRect(m,'#e5bd74');ctx.fillStyle='#fff0ba';ctx.fillRect(m.x,m.y,m.w,4)}
  for(const wall of o.walls)if(!wall.opened){drawRect(wall,'#aa6867');ctx.strokeStyle='#f9a89c';ctx.strokeRect(wall.x+3,wall.y+3,wall.w-6,wall.h-6)}
  for(const sw of o.switches){drawRect(sw,sw.active?'#86d6b0':'#e8c36c');ctx.fillStyle='#393a4c';ctx.fillRect(sw.x+6,sw.y+4,14,6)}
