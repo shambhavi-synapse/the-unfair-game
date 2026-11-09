@@ -100,7 +100,7 @@ if(tr.kind==='spike'){o.spikes.push({...range(tr.target+8,FLOOR-22,24,22),born:t
  if(o.chaser){o.chaser.x+=115*dt;if(overlaps(p,o.chaser))die()}
  for(const sp of o.spikes)if((sp.born===undefined||t>=sp.born)&&overlaps(p,sp))die();
  for(const f of o.fake)if(!f.used&&overlaps(p,f)){f.used=true;say('THAT IS NOT THE EXIT.',1.5);sound(170,.13)}
- if(p.y>H+10)die();if(overlaps(p,o.door))win();
+ if(p.y>H+10)die();if(overlaps(p,o.door)&&(o.doorMode!=='shy'||Math.abs(p.vx)<15))win();
  }
 function render(){if(screen!=='game'||!player)return;const p=player,o=objects,chapter=Math.floor(levelIndex/10),colors=['#2a3043','#2c3440','#353043','#2c3840','#34303c','#303344'];ctx.save();ctx.clearRect(0,0,W,H);ctx.fillStyle=colors[chapter]||colors[0];ctx.fillRect(0,0,W,H);
  const goal=Math.max(0,Math.min(Math.max(0,o.width-W),p.x-W*.38));camera+= (goal-camera)*.17;ctx.translate(-Math.round(camera),0);ctx.fillStyle='#353a50';for(let n=0;n<=level.width;n++){const x=n*40;ctx.fillRect(x,0,1,540)}for(let n=0;n<14;n++)ctx.fillRect(0,n*40,o.width,1);
