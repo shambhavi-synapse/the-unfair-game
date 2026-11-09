@@ -3,8 +3,8 @@ export function updateShyDoor(door, player, dt, limits) {
   const next={...door};
   const center=player.x+player.w/2;
   const approaching=player.vx>25 && player.x+player.w>door.x-155;
-  if(approaching && door.x<limits.maxX) next.x=Math.min(limits.maxX,door.x+180*dt);
-  else if(Math.abs(player.vx)<15 && door.x>center+36) next.x=Math.max(center+36,door.x-130*dt);
+  if(approaching && door.x<limits.maxX) next.x=Math.min(limits.maxX,door.x+305*dt);
+  else if(Math.abs(player.vx)<15 && door.x>center+8) next.x=Math.max(center+8,door.x-130*dt);
   return next;
 }
 export function bridgeActivated(plate, player) {
