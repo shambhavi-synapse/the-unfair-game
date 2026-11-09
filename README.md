@@ -1,39 +1,35 @@
-# THE UNFAIR GAME
+# Doorodo
 
-An original, zero-backend browser platformer with **60 individually scripted levels** across six chapters. Built with Canvas, vanilla JavaScript, CSS and browser localStorage. No assets borrowed from *Level Devil*.
+*A game about reaching a door. Good luck with that.*
 
-## Play locally
+Made by a bored student. **Shambhavi**.
 
-Use a local web server, because ES module imports usually cannot be loaded via `file://`.
+Original 2D browser platformer built with HTML Canvas, vanilla JavaScript and CSS for static GitHub Pages hosting.
 
-```bash
-python3 -m http.server 8000
-```
+## Development status
 
-Visit `http://localhost:8000`.
+This is an **in-progress overhaul**, not a completed 150-level game. The first 10 levels have been redesigned as longer scrolling challenges. The original 50 remaining scripted level definitions are preserved and require substantial gameplay redesign and manual playtesting. Chapter names for all 15 planned chapters are present; chapters 7–15 do **not** yet contain levels. The five-badge collection is implemented, with only the first two badges currently earnable after levels 30 and 60. Do not describe the game as 150 complete levels.
 
 ## Controls
 
-- A/D or arrow keys: move
-- W, Up or Space: jump
-- R: restart
-- Escape: pause
-- Touch: on-screen arrows and jump
+- Move: A/D or left/right arrow
+- Jump: Space, W or up arrow
+- Restart: R
+- Pause: Escape
+- Touch: on-screen controls
 
-## Run tests
+## Run
 
-```bash
-npm test
-```
+Serve the project from a local web server, e.g. `python3 -m http.server 8000`, then open `http://localhost:8000`.
 
-## Publishing
+## Tests
 
-Create a **new, empty** GitHub repository, upload the contents of this directory to its default branch, then in **Settings → Pages → Build and deployment**, choose **Deploy from a branch**, select the default branch and `/ (root)`. The game will load at `https://YOUR_USERNAME.github.io/YOUR_REPO/` after GitHub Pages builds.
+Run `npm test` (Node.js 18+). The automated tests cover level structure, basic geometry, badge definitions and chapter metadata. They do not prove that all levels can be completed, are fair, or are fun. Browser playtesting and accessibility/mobile checks remain necessary.
 
-## Verification caveat
+## Saved progress
 
-The included automated tests check 60 definitions, names, spawn/exit ground, switch references and layout diversity. They do **not** prove all 60 levels are fun or physically solvable. Full manual playtesting, frame-rate testing, assistive-technology checks and mobile-device checks are still required. This is a functioning first playable build, **not a certified final 60-level release**.
+The game retains the original `unfair-game-v1` localStorage key to preserve existing saves when upgrading from The Unfair Game. Reset progress uses confirmation.
 
-## Notes
+## Deployment
 
-Saved progress resides in each browser's localStorage. Audio uses Web Audio synthesis and only starts after player input. Fonts use Google Fonts when connected, with local fallbacks; download and self-host the OFL-licensed fonts for fully offline typography.
+The existing `.github/workflows/deploy.yml` runs tests and deploys to GitHub Pages after a push to `main`.
