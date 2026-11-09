@@ -38,3 +38,9 @@ h1{letter-spacing:-.055em}h1 em{color:#f17268}
  #game{padding-bottom:4px}
 }
 @media(prefers-reduced-motion:reduce){button{transition:none}}
+
+/* Optional portrait prompt, never blocks the player or the menus. */
+#landscape-tip{width:min(100%,1060px);display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin:0 0 6px;padding:5px 8px;border:1px solid #55576b;border-radius:9px;color:#d8d4d4;font-size:.74rem;background:#26283a}
+#landscape-tip button{padding:5px 8px;min-height:30px;font-size:.72rem;border-width:1px}
+#landscape-tip #dismiss-landscape{font-size:1rem}
+@media (orientation:landscape){#landscape-tip{display:none!important}}
