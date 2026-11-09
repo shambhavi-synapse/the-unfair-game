@@ -15,16 +15,16 @@ export const badges=[
 const L=(name, data={})=>({name,width:24,gaps:[],spikes:[],crumble:[],blink:[],movers:[],switches:[],fallers:[],triggers:[],walls:[],fake:[],...data});
 // Exact coordinates, triggers and combinations are individually specified.
 export const levels=[
- L('An Easy Start',{width:36,gaps:[[13,16],[27,29]],switches:[[21,25]],walls:[25]}),
- L('Just Keep Walking',{width:42,gaps:[[9,12],[20,23],[34,37]],crumble:[16,17],spikes:[29]}),
- L('The Floor Is Fine',{width:40,crumble:[11,12,13],gaps:[[19,22]],blink:[29,30],spikes:[35]}),
- L('A Minor Adjustment',{width:44,gaps:[[14,17],[28,31]],switches:[[10,24]],walls:[24],spikes:[35,39]}),
- L('Two Doors. Cute.',{width:45,gaps:[[15,18],[32,35]],fake:[25],switches:[[28,39]],walls:[39]}),
- L('Read the Room',{width:46,gaps:[[13,16],[29,32]],blink:[20,21],fallers:[25],switches:[[35,40]],walls:[40]}),
- L('Temporary Arrangement',{width:48,gaps:[[17,20],[33,36]],crumble:[10,11,27,28],spikes:[23,42]}),
- L('Quite a Detour',{width:50,gaps:[[12,15],[26,29],[40,43]],switches:[[20,35]],walls:[35],fake:[31]}),
- L('A Touch of Patience',{width:52,gaps:[[14,17],[31,34],[44,47]],blink:[21,22,38,39],spikes:[27],switches:[[41,49]],walls:[49]}),
- L('Beginner Friendly',{width:56,gaps:[[12,15],[25,28],[40,43]],crumble:[19,20],switches:[[32,47]],walls:[47],blink:[34,35],fallers:[37],spikes:[50]}),
+ L('An Easy Start',{width:36,gaps:[[13,16],[27,29]],switches:[[21,25]],walls:[25],triggers:[['collapse',17,19]]}),
+ L('Just Keep Walking',{width:42,gaps:[[9,12],[20,23],[34,37]],crumble:[16,17],spikes:[29],triggers:[['collapse',23,25]]}),
+ L('The Floor Is Fine',{width:40,crumble:[11,12,13],gaps:[[19,22]],blink:[29,30],spikes:[35],triggers:[['collapse',24,26]]}),
+ L('A Minor Adjustment',{width:44,gaps:[[14,17],[28,31]],switches:[[10,24]],walls:[24],spikes:[35,39],triggers:[['collapse',18,20]]}),
+ L('Two Doors. Cute.',{width:45,gaps:[[15,18],[32,35]],fake:[25],switches:[[28,39]],walls:[39],triggers:[['collapse',20,22]]}),
+ L('Read the Room',{width:46,gaps:[[13,16],[29,32]],blink:[20,21],fallers:[25],switches:[[35,40]],walls:[40],triggers:[['collapse',21,23]]}),
+ L('Temporary Arrangement',{width:48,gaps:[[17,20],[33,36]],crumble:[10,11,27,28],spikes:[23,42],triggers:[['collapse',21,24]]}),
+ L('Quite a Detour',{width:50,gaps:[[12,15],[26,29],[40,43]],switches:[[20,35]],walls:[35],fake:[31],triggers:[['collapse',31,33]]}),
+ L('A Touch of Patience',{width:52,gaps:[[14,17],[31,34],[44,47]],blink:[21,22,38,39],spikes:[27],switches:[[41,49]],walls:[49],triggers:[['collapse',24,26]]}),
+ L('Beginner Friendly',{width:56,gaps:[[12,15],[25,28],[40,43]],crumble:[19,20],switches:[[32,47]],walls:[47],blink:[34,35],fallers:[37],spikes:[50],triggers:[['collapse',43,45]]}),
  L('Thin Ice',{crumble:[7,8,9],spikes:[16]}),
  L('Now You See It',{blink:[8,9],gaps:[[16,18]]}),
  L('The Welcome Mat',{triggers:[['spike',9,12]],spikes:[18]}),
@@ -82,6 +82,7 @@ export function validateLevels(){
   if(!l.name||typeof l.name!=='string')errors.push(`${i+1}: missing name`);
   for(const [a,b] of l.gaps){if(!(a>=3&&b<=l.width-2&&b>a))errors.push(`${i+1}: bad gap`)}
   for(const p of [...l.spikes,...l.crumble,...l.blink,...l.fallers,...l.fake])if(p<3||p>=l.width-2)errors.push(`${i+1}: bad tile ${p}`);
+  for(const tr of l.triggers){if(tr[0]==='collapse'&&(tr[2]<3||tr[2]+1>=l.width-2))errors.push(`${i+1}: bad collapse trigger`)}
   for(const [x,w] of l.switches){if(x<3||x>=l.width-2||w<=x||w>=l.width-1)errors.push(`${i+1}: invalid switch`)}
  });return errors;
 }
