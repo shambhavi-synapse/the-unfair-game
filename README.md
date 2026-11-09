@@ -33,3 +33,11 @@ The game retains the original `unfair-game-v1` localStorage key to preserve exis
 ## Deployment
 
 The existing `.github/workflows/deploy.yml` runs tests and deploys to GitHub Pages after a push to `main`.
+
+## November 9 gameplay/mobile patch
+
+- Gameplay uses the available viewport height, preserving un-stretched game geometry by resizing the canvas coordinate width. Responsive mobile controls and scrollable, fitted overlays were checked in local Chromium at 320×568, 360×740, 390×844, 844×390 and 1280×800.
+- Menu badge and About navigation opened and closed successfully in local Chromium. Assets are cache-busted to help existing browsers pick up the newer version.
+- Three opening levels introduce deterministic, telegraphed collapsing-floor events. Predictable overhead drop hazards were removed from the opening chapter. All ten opening levels failed a simulated hold-right-only strategy, but none have been certified human-beatable or fairly balanced.
+- The 15 finalized chapter names and five award thresholds remain unchanged. Only 60 levels are implemented; the target of 150 remains unfinished.
+- Local automated tests: 10 passing. Production GitHub Pages deployment and live mobile gameplay verification require external checking.
