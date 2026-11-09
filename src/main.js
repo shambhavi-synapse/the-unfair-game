@@ -38,7 +38,7 @@ const fake=def.fake.map(n=>({x:n*TILE,y:FLOOR-64,w:31,h:64,used:false}));
 const bridge=def.bridge?{...def.bridge,active:false,plate:{x:def.bridge.plate*TILE+5,y:FLOOR-15,w:30,h:15}}:null;
 const roller=def.roller?{...def.roller,x:def.roller.spawn*TILE,y:FLOOR-40,w:40,h:40,speed:165,active:false,started:false,spent:false}:null;
 const triggers=def.triggers.map(([kind,x,target])=>({kind,x:x*TILE,target:target*TILE,done:false,clock:0}));
-return {floors,crumble,blink,walls,switches,spikes,fallers,movers,fake,triggers,door:range(def.width*TILE-57,FLOOR-62,35,62),width:def.width*TILE,chaser:null,bridge,roller,doorMode:def.doorMode,doorMaxX:def.width*TILE-45};
+return {floors,crumble,blink,walls,switches,spikes,fallers,movers,fake,triggers,door:range(def.doorMode==='shy'?(def.width-7)*TILE:def.width*TILE-57,FLOOR-62,35,62),width:def.width*TILE,chaser:null,bridge,roller,doorMode:def.doorMode,doorMaxX:def.width*TILE-45};
 }
 function start(i){if(i<0||i>=levels.length||i+1>save.unlocked)return;levelIndex=i;level=levels[i];objects=buildLevel(i);player={x:64,y:FLOOR-PY,w:PX,h:PY,vx:0,vy:0,grounded:false,coyote:0,buffer:0,jumpHeld:false,face:1,squash:0};t=0;camera=0;acc=0;dead=false;finished=false;paused=false;flash=0;shake=0;toastUntil=0;$('toast').classList.remove('show');$('overlay').classList.add('hidden');$('chapter-name').textContent=`CHAPTER ${Math.floor(i/10)+1} · ${chapters[Math.floor(i/10)][0]}`;$('level-name').textContent=`${i+1}. ${level.name}`;updateDeaths();show('game');}
 function updateDeaths(){$('death-counter').textContent=`☠ ${save.deaths}`}
