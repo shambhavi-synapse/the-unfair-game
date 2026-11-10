@@ -89,3 +89,69 @@ h1{letter-spacing:-.055em}h1 em{color:#f17268}
 .about-content p{line-height:1.45;margin:0 0 9px}
 .about-mascot{width:96px;height:100px;object-fit:contain;margin:5px auto}
 @media(max-width:500px){#menu h1{font-size:clamp(3.4rem,12vw,5rem)}.mascot-period{width:.14em}.about-content{padding-top:8px}}
+
+/* Doorodo UI refinement: existing game canvas, controls and palette remain intact. */
+#menu{position:relative;padding-top:clamp(74px,12vh,110px)}
+#menu .home-mark{position:absolute;top:max(15px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));width:clamp(98px,15vw,142px);height:auto;aspect-ratio:320/198;object-fit:contain}
+#menu h1{margin-top:18px}
+#menu .actions{gap:9px}
+#menu .actions button{min-height:46px;padding:9px 15px;line-height:1.18}
+#menu .actions #play{min-height:50px}
+#menu small{margin-top:28px}
+#levels .chapter{padding-block:17px 22px}
+#levels .chapter-head{margin-bottom:12px}
+#levels .chapter-head h3{font-size:clamp(1rem,2.4vw,1.25rem)}
+#levels .chapter-head span{font-size:.78rem}
+.door-grid{grid-template-columns:repeat(10,minmax(0,1fr));column-gap:clamp(5px,1.2vw,13px);row-gap:11px}
+.level-door{position:relative;display:grid;place-items:center;aspect-ratio:3/3.75;border:0;padding:5px 4px;background:transparent;color:#f4f0e8;border-radius:7px;min-width:0;min-height:61px;overflow:visible}
+.level-door:hover:not(:disabled){background:#34364b}
+.level-door-frame{position:relative;display:block;width:76%;height:100%;max-height:96px;min-height:55px;background:#eee8d9;border:2px solid #f9f3e6;padding:4px 4px 0;box-shadow:0 0 0 2px #474b60;border-radius:3px 3px 0 0}
+.level-door-panel{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#323648;border-radius:1px 1px 0 0}
+.level-door-number{font-size:clamp(.82rem,1.7vw,1.12rem);font-weight:700;color:#f3efe9;z-index:1;line-height:1}
+.level-door-knob{position:absolute;right:5%;top:54%;width:5px;height:6px;background:#e6c86c;border-radius:1px}
+.level-door.done .level-door-panel{background:#38534c}
+.level-door-complete{position:absolute;right:6%;top:5%;color:#9fe4bc;font-size:.7rem;line-height:1}
+.level-door.next .level-door-frame{box-shadow:0 0 0 2px #e9c877;outline:2px solid #e9c877;outline-offset:3px}
+.level-door.locked .level-door-frame{background:#787b8b;border-color:#9396a5;box-shadow:0 0 0 2px #3b3d4e}
+.level-door.locked .level-door-panel{background:#2c3040}
+.level-door.locked .level-door-number{color:#b8b9c4}
+.level-door-lock{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font:normal .73rem system-ui,sans-serif}
+.level-door:focus-visible{outline:3px solid #f0c369;outline-offset:2px}
+.locked-notice{min-height:1.35em;margin:8px auto 0;max-width:1030px;padding:0 20px;text-align:center;color:#f0c369;font-size:.85rem}
+.chapter-unbuilt{font-size:.9rem;color:#a5a4b7;margin:0}
+.badge-grid{gap:12px;margin-top:20px}
+.badge-card{padding:16px 12px;min-height:164px}
+.badge-medal{width:64px;height:64px;font-size:2rem;margin-bottom:7px}
+.settings-body:not(.about-content){margin-top:28px;gap:16px}
+.about-content{margin-top:12px}
+@media(max-width:680px){
+ #menu{padding:70px 13px 20px}
+ #menu .home-mark{width:clamp(90px,27vw,120px);top:max(8px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left))}
+ #menu h1{margin-top:24px}
+ #menu .subtitle{margin-bottom:24px}
+ #menu .actions{gap:8px;width:min(305px,89vw)}
+ #menu .actions button{font-size:1.04rem;min-height:45px;padding:8px 13px}
+ #menu .actions #play{min-height:48px}
+ #menu small{margin-top:22px;font-size:.66rem}
+ #levels header,#badges-screen header,#settings-screen header,#about-screen header{padding:17px 14px;gap:10px}
+ #chapters{margin-top:7px;padding:0 13px}
+ .door-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+ .level-door{padding:3px 1px;aspect-ratio:3/4;min-height:58px}
+ .level-door-frame{width:80%;min-height:50px;padding:3px 3px 0}
+ .level-door-number{font-size:.85rem}
+ .badge-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));width:calc(100% - 26px)}
+ .badge-card{min-height:150px}
+ .settings-body:not(.about-content){margin-top:12px;gap:13px}
+ .settings-body{font-size:1rem}
+}
+@media(max-height:650px) and (orientation:landscape){
+ #menu{padding-top:50px}
+ #menu .home-mark{width:88px;top:8px}
+ #menu h1{font-size:clamp(3rem,10vh,5rem);margin:5px 0 7px}
+ #menu .subtitle{margin-bottom:10px;font-size:.92rem}
+ #menu .actions{gap:5px}
+ #menu .actions button{min-height:36px;padding:5px 12px;font-size:.95rem}
+ #menu .actions #play{min-height:38px}
+ #menu small{margin-top:10px}
+}
+@media(prefers-reduced-motion:reduce){.level-door,.level-door-frame{transition:none}}
