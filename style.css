@@ -34,7 +34,7 @@ h1{letter-spacing:-.055em}h1 em{color:#f17268}
  #hud{flex-basis:42px;height:42px}
  #mobile{position:absolute;bottom:6px;left:12px;right:12px;width:auto;pointer-events:none}
  #mobile button{width:48px;height:44px;opacity:.85;pointer-events:auto}
- #game-wrap{max-width:calc((100dvh - 60px)*1.78)}
+ #game-wrap{width:100%;max-width:none;min-width:0}
  #game{padding-bottom:4px}
 }
 @media(prefers-reduced-motion:reduce){button{transition:none}}
@@ -44,3 +44,24 @@ h1{letter-spacing:-.055em}h1 em{color:#f17268}
 #landscape-tip button{padding:5px 8px;min-height:30px;font-size:.72rem;border-width:1px}
 #landscape-tip #dismiss-landscape{font-size:1rem}
 @media (orientation:landscape){#landscape-tip{display:none!important}}
+
+/* Accessible touch control alignment and full-width landscape gameplay. */
+#mobile button[data-control]{
+ display:inline-flex;align-items:center;justify-content:center;
+ text-align:center;line-height:1;vertical-align:middle;
+ padding:0;border-radius:12px;flex-shrink:0;
+ font-family:Arial,sans-serif;font-weight:700;
+ font-size:clamp(1.15rem,4.5vw,1.65rem);
+ box-sizing:border-box;overflow:hidden;
+ touch-action:none;-webkit-tap-highlight-color:transparent;
+}
+#mobile .mobile-left{display:flex;align-items:center;gap:clamp(8px,2.5vw,15px)}
+#game-wrap{min-width:0;max-width:100%}
+@media(max-height:480px) and (orientation:landscape){
+ #game{padding-left:max(4px,env(safe-area-inset-left));padding-right:max(4px,env(safe-area-inset-right));}
+ #game-wrap{width:100%;max-width:none}
+ #mobile{left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));bottom:max(5px,env(safe-area-inset-bottom))}
+ #mobile .mobile-left{gap:10px}
+ #mobile button[data-control]{width:56px;height:52px;font-size:22px;}
+ #game-wrap #overlay{z-index:5}
+}
