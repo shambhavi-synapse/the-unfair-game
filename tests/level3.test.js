@@ -27,7 +27,7 @@ test('Level 3 timed route activates roller, opens barrier and reaches exit',()=>
   const t=i*dt;
   // Continue to gate, wait and jump the approaching ball, then jump over final spike.
   const run=t<4.47||t>6.7;
-  const jump=(t>=5.23&&t<5.49)||(t>=7.38&&t<7.62);
+  const jump=(t>=5.23&&t<5.49)||(t>=7.0&&t<7.18);
   player.vx=run?260:0;
   player.coyote=player.grounded?.095:Math.max(0,player.coyote-dt);
   if(jump&&!jumped&&player.coyote>0){player.vy=-455;player.grounded=false;player.coyote=0}
