@@ -79,3 +79,13 @@ h1{letter-spacing:-.055em}h1 em{color:#f17268}
 @media (pointer:coarse) and (orientation:portrait){
  #mobile{padding-inline:max(7px,env(safe-area-inset-left)) max(7px,env(safe-area-inset-right));}
 }
+
+/* Doorodo brand: mascot punctuation is an inline part of the existing wordmark. */
+.mascot-period{display:inline-block;position:relative;width:.135em;height:.18em;background:#f1c76e;border-radius:.035em;vertical-align:baseline;margin-left:.028em;transform:translateY(.004em)}
+.period-eyes{position:absolute;left:54%;top:39%;width:.018em;height:.025em;background:#252536;border-radius:100%;box-shadow:.033em 0 0 #252536}
+.about-content{gap:12px;max-width:500px;margin-top:18px;text-align:center;justify-items:center}
+.about-content h2{margin:0;font-size:clamp(2rem,6vw,3rem)}
+.about-content h3{font-size:1.2rem;margin:4px 0 0}
+.about-content p{line-height:1.45;margin:0 0 9px}
+.about-mascot{width:96px;height:100px;object-fit:contain;margin:5px auto}
+@media(max-width:500px){#menu h1{font-size:clamp(3.4rem,12vw,5rem)}.mascot-period{width:.14em}.about-content{padding-top:8px}}
