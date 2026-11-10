@@ -1,6 +1,6 @@
 level,chapter,chapter_name,level_name,code_implemented,definition_validated,recorded_engine_completion,manual_completion,boss_position,ship_status
-"1","1","A Simple Beginning","An Easy Start","yes","yes","no","no","no","existing-production-level-unverified"
-"2","1","A Simple Beginning","Just Keep Walking","yes","yes","no","no","no","existing-production-level-unverified"
+"1","1","A Simple Beginning","An Easy Start","yes","yes","yes","no","no","existing-production-level-unverified"
+"2","1","A Simple Beginning","Just Keep Walking","yes","yes","yes","no","no","existing-production-level-unverified"
 "3","1","A Simple Beginning","The Floor Is Fine","yes","yes","yes","no","no","existing-production-level-unverified"
 "4","1","A Simple Beginning","A Minor Adjustment","yes","yes","no","no","no","existing-production-level-unverified"
 "5","1","A Simple Beginning","Two Doors. Cute.","yes","yes","no","no","no","existing-production-level-unverified"
