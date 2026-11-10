@@ -36,7 +36,7 @@ test('level selection has five door controls per row on phones and 60 doors in s
  const groups=elements.get('chapters').children;
  assert.equal(groups.length,15);
  assert.equal(groups.slice(0,6).reduce((n,g)=>n+g.children[1].children.length,0),60);
- assert.equal(groups.slice(6).filter(g=>g.children[1].children.length===0).length,9);
+ assert.equal(groups.slice(6).filter(g=>g.children[1].children.every(c=>c.className==='chapter-unbuilt')).length,9);
  const first=groups[0].children[1].children;
  assert.match(first[0].className,/level-door/);
  assert.match(first[2].className,/next/);
