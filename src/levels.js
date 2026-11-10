@@ -12,10 +12,10 @@ export const badges=[
  {after:120,name:'The Audacity',line:"You're still here.",mark:'♜'},
  {after:150,name:'Now What?',line:'You can go now.',mark:'⌑'}
 ];
-const L=(name, data={})=>({name,width:24,gaps:[],spikes:[],crumble:[],blink:[],movers:[],switches:[],fallers:[],triggers:[],walls:[],fake:[],doorMode:'normal',exitTile:null,fakeOpensGate:false,bridge:null,roller:null,...data});
+const L=(name, data={})=>({name,width:24,gaps:[],spikes:[],crumble:[],blink:[],movers:[],switches:[],fallers:[],triggers:[],walls:[],fake:[],doorMode:'normal',exitRequiresTile:null,exitRequiresSwitches:false,exitTile:null,fakeOpensGate:false,bridge:null,roller:null,reverseZones:[],portals:[],fans:[],...data});
 // Exact coordinates, triggers and combinations are individually specified.
 export const levels=[
- L('An Easy Start',{doorMode:'shy',width:36,gaps:[[13,16],[27,29]],switches:[[21,25]],walls:[25],triggers:[['collapse',17,19]]}),
+ L('An Easy Start',{doorMode:'shy',exitRequiresTile:29,exitRequiresSwitches:true,width:36,gaps:[[13,16],[27,29]],switches:[[21,25]],walls:[25],triggers:[['collapse',17,19]]}),
  L('Just Keep Walking',{width:42,gaps:[[9,12],[20,23],[34,37]],bridge:{from:20,to:23,plate:17},crumble:[16,17],spikes:[29]}),
  L('The Floor Is Fine',{width:40,roller:{trigger:22,spawn:19,barrier:31},walls:[31],gaps:[],blink:[14,15],spikes:[35]}),
  L('A Minor Adjustment',{width:44,gaps:[[14,17],[28,31]],switches:[[10,24]],walls:[24],spikes:[35,39],triggers:[['collapse',18,20]]}),
@@ -74,14 +74,22 @@ export const levels=[
  L('The Hesitation',{spikes:[20],triggers:[['chase',7,11],['rearGate',11,5],['delay',14,18]]}),
  L('The Unwelcome Reunion',{blink:[7,8,16,17],fallers:[11,19],fake:[14]}),
  L('Everything You Know',{switches:[[8,20]],walls:[20],gaps:[[12,14]],fallers:[16],crumble:[18],spikes:[10],triggers:[['bridge',11,12]]}),
- L('The Last Door',{gaps:[[8,10],[16,18]],switches:[[12,21]],walls:[21],triggers:[['spike',13,15]],fallers:[19],fake:[20]})
+ L('The Last Door',{gaps:[[8,10],[16,18]],switches:[[12,21]],walls:[21],triggers:[['spike',13,15]],fallers:[19],fake:[20]}),
+ L('Wrong Way Round',{width:28,reverseZones:[[8,17]],gaps:[[19,22]],spikes:[24]}),
+ L('Second Opinion',{width:32,portals:[[11,22]],fake:[9],gaps:[[14,21]],spikes:[27]}),
+ L('Windfall',{width:34,fans:[[8,21,175]],gaps:[[15,20]],spikes:[25,30]})
 ];
 export function validateLevels(){
- const errors=[];if(chapters.length!==15)errors.push('Expected 15 chapter definitions');if(levels.length!==60)errors.push(`Expected 60 levels, got ${levels.length}`);
+ const errors=[];if(chapters.length!==15)errors.push('Expected 15 chapter definitions');if(levels.length!==63)errors.push(`Expected 63 levels, got ${levels.length}`);
  levels.forEach((l,i)=>{
   if(!l.name||typeof l.name!=='string')errors.push(`${i+1}: missing name`);
+  for(const [a,b] of l.reverseZones){if(a<3||b>l.width-2||a>=b)errors.push(`${i+1}: invalid reversed-control region`)}
+  for(const [entry,dest] of l.portals){if(entry<3||entry>=l.width-2||dest<3||dest>=l.width-2||l.gaps.some(([a,b])=>dest>=a&&dest<b)||l.spikes.includes(dest))errors.push(`${i+1}: unsafe portal`)}
+  for(const [a,b,strength] of l.fans){if(a<3||b>l.width-2||a>=b||Math.abs(strength)>400)errors.push(`${i+1}: invalid fan`)}
   for(const [a,b] of l.gaps){if(!(a>=3&&b<=l.width-2&&b>a))errors.push(`${i+1}: bad gap`)}
   for(const p of [...l.spikes,...l.crumble,...l.blink,...l.fallers,...l.fake])if(p<3||p>=l.width-2)errors.push(`${i+1}: bad tile ${p}`);
+  if(l.exitRequiresTile!==null&&(!Number.isInteger(l.exitRequiresTile)||l.exitRequiresTile<4||l.exitRequiresTile>=l.width-2))errors.push(`${i+1}: invalid exit clearance tile`);
+  if(l.exitRequiresSwitches&&!l.switches.length)errors.push(`${i+1}: exit requires switches but none exist`);
   if(l.exitTile!==null&&(l.exitTile<4||l.exitTile>=l.width-2||l.fake.includes(l.exitTile)))errors.push(`${i+1}: invalid alternate exit`);
   if(l.fakeOpensGate&&(!l.fake.length||!l.walls.length))errors.push(`${i+1}: fake door lacks gate`);
   if(l.doorMode!=='normal'&&l.doorMode!=='shy')errors.push(`${i+1}: invalid door mode`);

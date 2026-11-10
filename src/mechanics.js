@@ -1,10 +1,12 @@
 // Mechanic state transitions. Pure logic makes behaviour reproducible and testable.
 export function updateShyDoor(door, player, dt, limits) {
   const next={...door};
+  const minX=Number.isFinite(limits.minX)?limits.minX:-Infinity;
   const center=player.x+player.w/2;
   const approaching=player.vx>25 && player.x+player.w>door.x-155;
   if(approaching && door.x<limits.maxX) next.x=Math.min(limits.maxX,door.x+305*dt);
-  else if(Math.abs(player.vx)<15 && door.x>center+8) next.x=Math.max(center+8,door.x-130*dt);
+  else if(Math.abs(player.vx)<15 && door.x>center+8) next.x=Math.max(minX,center+8,door.x-130*dt);
+  next.x=Math.max(minX,next.x);
   return next;
 }
 export function bridgeActivated(plate, player) {

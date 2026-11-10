@@ -31,12 +31,13 @@ function uiGame(){
     document,window,localStorage,()=>{},undefined,()=>({matches:false}),()=>true),
    elements,writeCount:()=>writes};
 }
-test('level selection has five door controls per row on phones and 60 doors in six groups',()=>{
+test('level selection has five door controls per row on phones and 63 doors in seven groups',()=>{
  const {ui,elements}=uiGame();ui.renderLevels();
  const groups=elements.get('chapters').children;
  assert.equal(groups.length,15);
  assert.equal(groups.slice(0,6).reduce((n,g)=>n+g.children[1].children.length,0),60);
- assert.equal(groups.slice(6).filter(g=>g.children[1].children.every(c=>c.className==='chapter-unbuilt')).length,9);
+ assert.equal(groups.slice(6).filter(g=>g.children[1].children.every(c=>c.className==='chapter-unbuilt')).length,8)
+ assert.equal(groups[6].children[1].children.length,3);
  const first=groups[0].children[1].children;
  assert.match(first[0].className,/level-door/);
  assert.match(first[2].className,/next/);

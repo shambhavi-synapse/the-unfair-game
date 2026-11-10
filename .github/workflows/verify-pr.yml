@@ -1,0 +1,29 @@
+name: Doorodo review checks
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'index.html'
+      - 'style.css'
+      - 'package.json'
+      - '.github/workflows/verify-pr.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify JavaScript syntax
+        run: |
+          node --check src/main.js
+          node --check src/levels.js
+          node --check src/mechanics.js
+      - name: Run unit and engine tests
+        run: npm test
