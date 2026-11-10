@@ -49,12 +49,11 @@ function simulate(index,steer,maxSteps=2200){
   }else{
    if(z.x>=320&&z.x<840)sawFan=true;
    if(stage===0&&z.x>=510&&z.grounded){stage=1;jumpUntil=t+.27}
-   if(stage===1&&z.x>805&&z.grounded&&t>jumpUntil+.1){stage=2;sawLastGap=true}
-   if(stage===2&&z.x>=935&&z.grounded){stage=3;jumpUntil=t+.27}
-   if(stage===3&&z.x>1060&&z.grounded&&t>jumpUntil+.1){stage=4}
-   if(stage===4&&z.x>=1095&&z.grounded){stage=5;jumpUntil=t+.27}
+   if(z.x>810&&z.grounded)sawLastGap=true;
+   if(stage===1&&z.x>=935&&z.grounded&&t>jumpUntil+.1){stage=2;jumpUntil=t+.27}
+   if(stage===2&&z.x>=1095&&z.grounded&&t>jumpUntil+.1){stage=3;jumpUntil=t+.27}
    game.keys.right=true;game.keys.left=false;
-   game.handleJump([1,3,5].includes(stage)&&t<jumpUntil);
+   game.handleJump([1,2,3].includes(stage)&&t<jumpUntil);
   }
   game.physics(dt);
  }
