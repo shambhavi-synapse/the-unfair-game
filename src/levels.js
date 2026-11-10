@@ -17,7 +17,7 @@ const L=(name, data={})=>({name,width:24,gaps:[],spikes:[],crumble:[],blink:[],m
 export const levels=[
  L('An Easy Start',{doorMode:'shy',width:36,gaps:[[13,16],[27,29]],switches:[[21,25]],walls:[25],triggers:[['collapse',17,19]]}),
  L('Just Keep Walking',{width:42,gaps:[[9,12],[20,23],[34,37]],bridge:{from:20,to:23,plate:17},crumble:[16,17],spikes:[29]}),
- L('The Floor Is Fine',{width:40,roller:{trigger:22,spawn:19,barrier:31},walls:[31],gaps:[],blink:[29,30],spikes:[35]}),
+ L('The Floor Is Fine',{width:40,roller:{trigger:22,spawn:19,barrier:31},walls:[31],gaps:[],blink:[14,15],spikes:[35]}),
  L('A Minor Adjustment',{width:44,gaps:[[14,17],[28,31]],switches:[[10,24]],walls:[24],spikes:[35,39],triggers:[['collapse',18,20]]}),
  L('Two Doors. Cute.',{width:45,gaps:[[15,18],[32,35]],fake:[25],switches:[[28,39]],walls:[39]}),
  L('Read the Room',{width:46,gaps:[[13,16],[29,32]],blink:[20,21],switches:[[35,40]],walls:[40]}),
