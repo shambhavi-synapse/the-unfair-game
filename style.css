@@ -145,7 +145,7 @@ h1{letter-spacing:-.055em}h1 em{color:#f17268}
  .settings-body{font-size:1rem}
 }
 @media(max-height:650px) and (orientation:landscape){
- #menu{padding-top:50px}
+ #menu{padding-top:50px;padding-bottom:8px}
  #menu .home-mark{width:88px;top:8px}
  #menu h1{font-size:clamp(3rem,10vh,5rem);margin:5px 0 7px}
  #menu .subtitle{margin-bottom:10px;font-size:.92rem}
