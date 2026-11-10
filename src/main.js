@@ -16,7 +16,7 @@ $('dismiss-landscape').onclick=()=>{landscapeDismissed=true;updateLandscapeTip()
 $('go-landscape').onclick=async()=>{
  const element=$('game');
  try{if(element.requestFullscreen&&!document.fullscreenElement)await element.requestFullscreen()}catch{}
- try{if(screen.orientation?.lock)await screen.orientation.lock('landscape')}catch{}
+ try{if(window.screen?.orientation?.lock)await window.screen.orientation.lock('landscape')}catch{}
  updateLandscapeTip();
 };
 window.addEventListener('orientationchange',updateLandscapeTip);
