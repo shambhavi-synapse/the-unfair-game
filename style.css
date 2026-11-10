@@ -155,3 +155,9 @@ h1{letter-spacing:-.055em}h1 em{color:#f17268}
  #menu small{margin-top:10px}
 }
 @media(prefers-reduced-motion:reduce){.level-door,.level-door-frame{transition:none}}
+
+/* Lightweight preview entry; does not alter the saved campaign. */
+#menu .actions #preview{min-height:43px;background:#303747;border:2px solid #d4ad68;color:#f1cc79;padding:7px 12px;font-size:.94rem;letter-spacing:.015em}
+#menu .actions #preview span{margin-left:8px}
+@media(max-width:680px){#menu .actions #preview{min-height:43px;font-size:.91rem}}
+@media(max-height:650px) and (orientation:landscape){#menu .actions #preview{min-height:34px;padding:4px 11px;font-size:.85rem}}
