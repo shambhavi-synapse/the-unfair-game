@@ -114,13 +114,7 @@ function render(){if(screen!=='game'||!player)return;const p=player,o=objects,ch
  const drawRect=(r,color)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(r.x),Math.round(r.y),r.w,r.h)};
  for(const f of o.floors){drawRect(f,'#606e7b');ctx.fillStyle='#9aa8ad';ctx.fillRect(f.x,f.y,40,5)}
  for(const b of o.blink){const on=Math.sin(t*2.5*Math.PI+b.phase*Math.PI*2)>=-.3;ctx.globalAlpha=on?1:.17;drawRect(b,'#b7a4e0');ctx.fillStyle='#e2d5ff';ctx.fillRect(b.x,b.y,40,5);ctx.globalAlpha=1}
- for(const tr of o.triggers)if(tr.kind==='collapse'&&!tr.done){
- const tx=tr.target;
- ctx.fillStyle='#b7a4e0';ctx.globalAlpha=.55;
- for(let j=0;j<2;j++){ctx.fillRect(tx+j*TILE+5,FLOOR-2,30,2)}
- ctx.globalAlpha=1;
-}
- for(const c of o.crumble){if(c.fallen)continue;drawRect(c,c.timer>=0?'#a8765f':'#826d6c');ctx.fillStyle='#d6b4a2';ctx.fillRect(c.x,c.y,40,5);ctx.strokeStyle='#352f3e';ctx.beginPath();ctx.moveTo(c.x+10,c.y+8);ctx.lineTo(c.x+24,c.y+20);ctx.lineTo(c.x+30,c.y+27);ctx.stroke()}
+ for(const c of o.crumble){if(c.fallen)continue;drawRect(c,c.timer>=0?'#a8765f':'#826d6c');ctx.fillStyle='#d6b4a2';ctx.fillRect(c.x,c.y,40,5);if(c.timer>=0){ctx.strokeStyle='#352f3e';ctx.beginPath();ctx.moveTo(c.x+10,c.y+8);ctx.lineTo(c.x+24,c.y+20);ctx.lineTo(c.x+30,c.y+27);ctx.stroke()}}
  if(o.bridge){const b=o.bridge;drawRect(b.plate,b.active?'#86d6b0':'#f1c66e');for(let i=b.from;i<b.to;i++){ctx.globalAlpha=b.active?1:.3;drawRect({x:i*TILE,y:FLOOR,w:TILE,h:6},b.active?'#8fd4b8':'#6a7a8d');ctx.globalAlpha=1}}
  if(o.roller){const r=o.roller;ctx.save();ctx.fillStyle=r.spent?'#8a847e':'#d99976';ctx.beginPath();ctx.arc(r.x+r.w/2,r.y+r.h/2,r.w/2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#f6c7a7';ctx.lineWidth=4;ctx.stroke();ctx.restore();}
  for(const m of o.movers){drawRect(m,'#e5bd74');ctx.fillStyle='#fff0ba';ctx.fillRect(m.x,m.y,m.w,4)}
@@ -134,7 +128,7 @@ function render(){if(screen!=='game'||!player)return;const p=player,o=objects,ch
 }
  for(const sw of o.switches){drawRect(sw,sw.active?'#86d6b0':'#e8c36c');ctx.fillStyle='#393a4c';ctx.fillRect(sw.x+6,sw.y+4,14,6)}
  for(const s of o.spikes){if(s.born!==undefined&&t<s.born){ctx.globalAlpha=.4;drawRect({x:s.x,y:FLOOR-3,w:s.w,h:3},'#f58f81');ctx.globalAlpha=1;continue}ctx.fillStyle='#fb817b';ctx.beginPath();ctx.moveTo(s.x,FLOOR);ctx.lineTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,FLOOR);ctx.closePath();ctx.fill()}
- for(const f of o.fallers){drawRect(f,'#d97970');ctx.fillStyle='#f9b2a0';ctx.fillRect(f.x+4,f.y+f.h-5,f.w-8,4);if(!f.triggered){ctx.strokeStyle='#d97970';ctx.beginPath();ctx.moveTo(f.x+f.w/2,0);ctx.lineTo(f.x+f.w/2,f.y);ctx.stroke()}}
+ for(const f of o.fallers){if(!f.triggered)continue;drawRect(f,'#d97970');ctx.fillStyle='#f9b2a0';ctx.fillRect(f.x+4,f.y+f.h-5,f.w-8,4);if(!f.triggered){ctx.strokeStyle='#d97970';ctx.beginPath();ctx.moveTo(f.x+f.w/2,0);ctx.lineTo(f.x+f.w/2,f.y);ctx.stroke()}}
  if(o.chaser)drawRect(o.chaser,'#ef9770');
  const drawDoor=d=>{drawRect(d,'#eee8d9');drawRect({x:d.x+6,y:d.y+7,w:d.w-12,h:d.h-7},'#323648');ctx.fillStyle='#e6c86c';ctx.fillRect(d.x+d.w-11,d.y+33,4,5);ctx.strokeStyle='#f9f3e6';ctx.strokeRect(d.x-3,d.y-3,d.w+6,d.h+3)};for(const f of o.fake)drawDoor(f);
  drawDoor(o.door);
