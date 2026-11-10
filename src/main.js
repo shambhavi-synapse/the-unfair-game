@@ -117,7 +117,14 @@ function render(){if(screen!=='game'||!player)return;const p=player,o=objects,ch
  if(o.bridge){const b=o.bridge;drawRect(b.plate,b.active?'#86d6b0':'#f1c66e');for(let i=b.from;i<b.to;i++){ctx.globalAlpha=b.active?1:.3;drawRect({x:i*TILE,y:FLOOR,w:TILE,h:6},b.active?'#8fd4b8':'#6a7a8d');ctx.globalAlpha=1}}
  if(o.roller){const r=o.roller;ctx.save();ctx.fillStyle=r.spent?'#8a847e':'#d99976';ctx.beginPath();ctx.arc(r.x+r.w/2,r.y+r.h/2,r.w/2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#f6c7a7';ctx.lineWidth=4;ctx.stroke();ctx.restore();}
  for(const m of o.movers){drawRect(m,'#e5bd74');ctx.fillStyle='#fff0ba';ctx.fillRect(m.x,m.y,m.w,4)}
- for(const wall of o.walls)if(!wall.opened){drawRect(wall,'#aa6867');ctx.strokeStyle='#f9a89c';ctx.strokeRect(wall.x+3,wall.y+3,wall.w-6,wall.h-6)}
+ for(const wall of o.walls)if(!wall.opened){
+ drawRect(wall,'#aa6867');ctx.strokeStyle='#f9a89c';ctx.strokeRect(wall.x+3,wall.y+3,wall.w-6,wall.h-6);
+ if(o.roller&&wall.x===o.roller.barrier*TILE){
+   ctx.fillStyle='#f4d5a5';ctx.font='bold 14px Fredoka, sans-serif';
+   ctx.fillText('◉',wall.x+4,wall.y-12);
+   ctx.strokeStyle='#f4d5a5';ctx.beginPath();ctx.moveTo(wall.x+7,wall.y+7);ctx.lineTo(wall.x+16,wall.y+7);ctx.stroke();
+ }
+}
  for(const sw of o.switches){drawRect(sw,sw.active?'#86d6b0':'#e8c36c');ctx.fillStyle='#393a4c';ctx.fillRect(sw.x+6,sw.y+4,14,6)}
  for(const s of o.spikes){if(s.born!==undefined&&t<s.born){ctx.globalAlpha=.4;drawRect({x:s.x,y:FLOOR-3,w:s.w,h:3},'#f58f81');ctx.globalAlpha=1;continue}ctx.fillStyle='#fb817b';ctx.beginPath();ctx.moveTo(s.x,FLOOR);ctx.lineTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,FLOOR);ctx.closePath();ctx.fill()}
  for(const f of o.fallers){drawRect(f,'#d97970');ctx.fillStyle='#f9b2a0';ctx.fillRect(f.x+4,f.y+f.h-5,f.w-8,4);if(!f.triggered){ctx.strokeStyle='#d97970';ctx.beginPath();ctx.moveTo(f.x+f.w/2,0);ctx.lineTo(f.x+f.w/2,f.y);ctx.stroke()}}
@@ -125,6 +132,14 @@ function render(){if(screen!=='game'||!player)return;const p=player,o=objects,ch
  for(const f of o.fake){drawRect(f,f.used?'#625a70':'#9294a4');ctx.fillStyle='#2a3043';ctx.fillRect(f.x+5,f.y+7,21,53);ctx.fillStyle='#f0d887';ctx.fillRect(f.x+23,f.y+33,3,4);ctx.fillStyle='#eae1d4';ctx.font='bold 11px Fredoka';ctx.fillText('?',f.x+12,f.y+23)}
  const d=o.door;drawRect(d,'#eee8d9');drawRect({x:d.x+6,y:d.y+7,w:d.w-12,h:d.h-7},'#323648');ctx.fillStyle='#e6c86c';ctx.fillRect(d.x+d.w-11,d.y+33,4,5);ctx.strokeStyle='#f9f3e6';ctx.strokeRect(d.x-3,d.y-3,d.w+6,d.h+3);
  if(!dead){ctx.save();ctx.translate(p.x+p.w/2,p.y+p.h/2);ctx.scale(1+(p.squash>0?.13:0),1-(p.squash>0?.12:0));ctx.fillStyle='#f1c76e';ctx.beginPath();ctx.roundRect(-12,-16,24,32,7);ctx.fill();ctx.fillStyle='#252536';ctx.fillRect(p.face>0?1:-7,-5,4,5);ctx.fillRect(p.face>0?7:-1,-5,4,5);ctx.restore()}
+ // Progressive visibility: keep two seconds of forward reaction room while
+ // preventing landscape viewports from revealing an entire level at spawn.
+ const revealX=Math.min(o.width,p.x+535);
+ const fog=ctx.createLinearGradient(revealX-110,0,revealX+60,0);
+ fog.addColorStop(0,'rgba(42,48,67,0)');
+ fog.addColorStop(1,'rgba(42,48,67,1)');
+ ctx.fillStyle=fog;
+ ctx.fillRect(revealX-110,0,Math.max(0,o.width-revealX+110),H);
  if(flash>0){ctx.fillStyle=`rgba(255,110,100,${Math.min(.35,flash*2)})`;ctx.fillRect(0,0,W,H)}ctx.restore();}
 function frame(time){let elapsed=Math.min(.05,(time-last)/1000||0);last=time;if(screen==='game'&&!paused){if(dead){flash=Math.max(0,flash-elapsed);t+=elapsed;if(t>toastUntil+.1)start(levelIndex,true)}else if(!finished){acc+=elapsed;let steps=0;while(acc>=DT&&steps++<8){physics(DT);acc-=DT}}if(t>toastUntil)$('toast').classList.remove('show')}render();requestAnimationFrame(frame)}
 function pause(){if(screen!=='game'||finished||dead)return;paused=!paused;if(paused)overlay('PAUSED','The traps are taking a break.',[['RESUME',()=>{$('overlay').classList.add('hidden');paused=false},true],['RESTART',()=>start(levelIndex)],['MENU',()=>show('menu')]]);else $('overlay').classList.add('hidden')}
