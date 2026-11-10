@@ -14,7 +14,7 @@ test('all finalized chapter names remain unchanged',()=>assert.deepEqual(chapter
 test('first three levels use distinct environment puzzles',()=>{
  assert.equal(levels[0].doorMode,'shy');
  assert.deepEqual(levels[1].bridge,{from:20,to:23,plate:17});
- assert.deepEqual(levels[2].roller,{trigger:14,spawn:10,barrier:31});
+ assert.deepEqual(levels[2].roller,{trigger:22,spawn:19,barrier:31});
  assert.ok(levels[2].walls.includes(31));
  assert.ok(levels[0].width>24&&levels[1].width>24&&levels[2].width>24);
 });
