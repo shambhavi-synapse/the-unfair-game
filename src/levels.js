@@ -39,7 +39,7 @@ export const levels=[
  L('Second Thoughts',{gaps:[[8,11]],switches:[[14,19]],walls:[19]}),
  L('Time It Right',{blink:[7,8,15,16],spikes:[20]}),
  L('The Switchback',{switches:[[7,15]],walls:[15],spikes:[11,20],triggers:[['relocateDoor',16,12]]}),
- L('Give It a Second',{triggers:[['delay',9,13]],gaps:[[17,19]],triggers:[['delay',9,13],['bridge',15,17]]}),
+ L('Give It a Second',{gaps:[[17,19]],triggers:[['delay',9,13],['bridge',15,17]]}),
  L('Look Before Landing',{gaps:[[9,12]],fallers:[16],spikes:[19]}),
  L('The Fake Shortcut',{fake:[13],fakeOpensGate:true,switches:[[9,20]],walls:[20]}),
  L('Ride and Decide',{movers:[[8,12,3]],gaps:[[8,14]],spikes:[19]}),
@@ -71,7 +71,7 @@ export const levels=[
  L('Decoy Season',{fake:[10,16,20],exitTile:18,spikes:[13]}),
  L('The Narrow Escape',{gaps:[[8,11],[17,20]],movers:[[8,11,2],[17,20,2]]}),
  L('Full Circle',{switches:[[8,18]],walls:[18],crumble:[12,13],fallers:[16,21]}),
- L('The Hesitation',{triggers:[['chase',7,11],['delay',14,18]],spikes:[20],triggers:[['chase',7,11],['rearGate',11,5],['delay',14,18]]}),
+ L('The Hesitation',{spikes:[20],triggers:[['chase',7,11],['rearGate',11,5],['delay',14,18]]}),
  L('The Unwelcome Reunion',{blink:[7,8,16,17],fallers:[11,19],fake:[14]}),
  L('Everything You Know',{switches:[[8,20]],walls:[20],gaps:[[12,14]],fallers:[16],crumble:[18],spikes:[10],triggers:[['bridge',11,12]]}),
  L('The Last Door',{gaps:[[8,10],[16,18]],switches:[[12,21]],walls:[21],triggers:[['spike',13,15]],fallers:[19],fake:[20]})
