@@ -23,15 +23,15 @@ jobs:
             const code=await fetch(root+'src/levels.js?live-check='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
             levels=await code.text();
             console.log('Attempt',attempt,'HTML HTTP',response.status,'levels HTTP',code.status,
-              'new version',html.includes('doorodo-expansion-20261110'),
+              'new version',html.includes('doorodo-ch7-preview-20261110'),
               'new levels',levels.includes("L('Windfall'"));
-            if(response.ok&&code.ok&&html.includes('doorodo-expansion-20261110')&&
+            if(response.ok&&code.ok&&html.includes('doorodo-ch7-preview-20261110')&&
               levels.includes("L('Wrong Way Round'")&&levels.includes("L('Second Opinion'")&&
               levels.includes("L('Windfall'"))break;
             if(attempt<10)await new Promise(resolve=>setTimeout(resolve,10000));
           }
           assert.equal(response.status,200,'production HTML must be served');
-          assert.match(html,/doorodo-expansion-20261110/,'production HTML must reference new build');
+          assert.match(html,/doorodo-ch7-preview-20261110/,'production HTML must reference new build');
           assert.match(levels,/L\('Wrong Way Round'/);
           assert.match(levels,/L\('Second Opinion'/);
           assert.match(levels,/L\('Windfall'/);
@@ -40,6 +40,8 @@ jobs:
           assert.equal(engine.status,200,'production engine must load');
           assert.match(engineText,/portalCooldown/);
           assert.match(engineText,/reverseActive/);
+          assert.match(engineText,/previewMode/);
+          assert.match(html,/id="preview"/);
           assert.doesNotMatch(engineText,/continuectx/);
           console.log('PASS: Production HTML, 3 new levels, and engine fetched from public GitHub Pages');
           JS
