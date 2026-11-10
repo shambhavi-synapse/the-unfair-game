@@ -41,3 +41,11 @@ The existing `.github/workflows/deploy.yml` runs tests and deploys to GitHub Pag
 - Three opening levels introduce deterministic, telegraphed collapsing-floor events. Predictable overhead drop hazards were removed from the opening chapter. All ten opening levels failed a simulated hold-right-only strategy, but none have been certified human-beatable or fairly balanced.
 - The 15 finalized chapter names and five award thresholds remain unchanged. Only 60 levels are implemented; the target of 150 remains unfinished.
 - Local automated tests: 10 passing. Production GitHub Pages deployment and live mobile gameplay verification require external checking.
+
+## November 10: Official Doorodo mascot and game-mechanic pass
+
+**Doorodo** is both the game's title and its small yellow playable character. The original wordmark now uses the miniature mascot as its punctuation. Local vector artwork is hosted in `assets/`: `doorodo-logo.svg` (character suspiciously eyeing a closed door), `doorodo-favicon.svg`, `doorodo-app-icon.svg`, and `doorodo-about.svg`.
+
+The existing 60 level scripts remain; seven levels (16, 24, 25, 34, 48, 57, 59) were updated with new deterministic environmental events in this pass. Added helpful triggered bridges, rear gates and relocated exits. The orientation control now calls the actual browser `window.screen.orientation` API where supported; the bottom landscape control dock remains untouched.
+
+This **does not complete the requested sixty-level overhaul**. All 60 definitions were inspected, but only seven received new level-specific event content this pass. Playthrough validation is still required for those seven and for the other levels. Test checks confirm event transitions, reset behavior and existing structural constraints; tests cannot establish difficulty, fairness or fun. See `LEVEL_AUDIT_60.md`.
