@@ -80,3 +80,27 @@ Legend: **H** = major manual testing risk, **M** = moderate, **L** = low structu
 ## Required next quality gate
 
 For each level, capture one successful engine-controlled or human playthrough, verify mobile portrait/landscape visibility and keyboard/touch equivalence, confirm restarts and trigger reset, measure whether holding right bypasses its central mechanic, then revise any softlocks or repetitive challenges.
+
+## November 10: Mascot and environmental mechanisms development pass
+
+All sixty source definitions were re-inspected. **Seven levels** received new authored environmental events in this pass. All other original level definitions remain, including the previous improvements to levels 1–3, 27, 42 and 54.
+
+| Level | New linked event | What it changes |
+|---:|---|---|
+| 16 | Helpful bridge after crossing tile 12 | Unexpectedly fills the second gap, making the environment occasionally helpful |
+| 24 | Door relocation after gate | The exit changes to a position behind the player after the switch/gate section |
+| 25 | Bridge after delayed drop | A different, helpful environmental consequence interacts with a hazard section |
+| 34 | Rear gate | A wall rises behind the player after the first obstacle and blocks a simple retreat |
+| 48 | Door relocation | Two decoy doors gain a backtracking puzzle, with the actual exit moved after a threshold |
+| 57 | Rear gate during pursuit | The pursuing sequence changes the available retreat path |
+| 59 | Bridge appears ahead | A triggered platform turns a risky gap into a usable route |
+
+The event system is deterministic and its state resets on restart. Automated engine tests cover each **event type** (not the full end-to-end route of each affected level). Reusing the existing physics and rendering systems avoids a wholesale engine replacement.
+
+**Mascot identity:** Doorodo is now also the canonical name of the little yellow playable character. Added four locally hosted SVG vectors: compact character-and-door logo, favicon, app icon, and smirking About illustration. The original home wordmark keeps its typography and now ends with mascot-shaped punctuation. About introduces the character and retains the existing creator credit.
+
+**Camera and mobile:** Retained the normal illuminated side-scrolling camera and landscape control dock. Corrected an orientation API bug caused by a local `screen` state variable shadowing the browser's `window.screen` object.
+
+**Tests:** 34/34 checks passed in an adapted in-memory test harness. The full GitHub Actions Node test run, visually rendered web app, touch-device behavior and production deployment have **not** been independently verified in this pass.
+
+**Not complete:** The required individual redesign and end-to-end human verification of **all sixty levels** is still pending. The seven new event levels are **not certified beatable** merely because their event transitions pass tests. Other levels have not been silently declared overhauled.
