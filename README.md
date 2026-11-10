@@ -49,3 +49,17 @@ The existing `.github/workflows/deploy.yml` runs tests and deploys to GitHub Pag
 The existing 60 level scripts remain; seven levels (16, 24, 25, 34, 48, 57, 59) were updated with new deterministic environmental events in this pass. Added helpful triggered bridges, rear gates and relocated exits. The orientation control now calls the actual browser `window.screen.orientation` API where supported; the bottom landscape control dock remains untouched.
 
 This **does not complete the requested sixty-level overhaul**. All 60 definitions were inspected, but only seven received new level-specific event content this pass. Playthrough validation is still required for those seven and for the other levels. Test checks confirm event transitions, reset behavior and existing structural constraints; tests cannot establish difficulty, fairness or fun. See `LEVEL_AUDIT_60.md`.
+
+## November 10: Mascot expression and UI refinement
+
+This is a **graphics and interface-only** development pass. All sixty level definitions, the gameplay world, keyboard/touch movement rules, collision system, camera and landscape control dock are preserved.
+
+- **Logo:** Refined the face to glance suspiciously rightward; updated the illustrated closed door to derive from the existing in-game Canvas exit geometry (35×62, cream outer slab, dark inset, yellow knob and cream outline). Logo positioned in the home screen's top-left corner instead of above the centre of the title.
+- **About:** Redrew the same yellow rounded-rectangle character with a visibly asymmetrical sly grin. Original short copy and creator credit remain.
+- **Wordmark:** Kept cream/coral lettering and mascot punctuation; eliminated the upper home-screen tagline completely.
+- **Menus:** Moderately condensed mobile action buttons and section padding, with the Play button slightly more prominent.
+- **Level selection:** Uses small framed **door buttons**, visibly distinct completed/next/locked states, accessible locked labels and chapter completion counters. Locked doors are clickable but do not change progress, giving cooldown-limited, non-modal remarks.
+- **Commentary:** Most ordinary deaths remain silent, with a 12-second time gap between rare specific remarks. Automatic respawn is governed by its own short timer instead of the message display duration.
+- **Asset portability:** All logo, favicon, app and About illustrations remain local optimized SVG files. No remote image service.
+
+**Verification:** The existing and new tests passed (38/38) in an adapted source-level harness and JavaScript syntax checks passed. Logo/face SVGs were raster-rendered locally at small target sizes for inspection. Full-page Chromium navigation was blocked by the runtime, and actual Android screenshots, touch testing and GitHub Pages production deployment remain **unverified**. These tests do not complete the 60-level gameplay overhaul.
