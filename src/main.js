@@ -77,7 +77,7 @@ function renderLevels(){
     const number=document.createElement('span');number.className='level-door-number';number.textContent=i+1;
     const knob=document.createElement('span');knob.className='level-door-knob';
     panel.append(number,knob);
-    if(locked){const lock=document.createElement('span');lock.className='level-door-lock';lock.setAttribute('aria-hidden','true');lock.textContent='♙';panel.append(lock)}
+    if(locked){const lock=document.createElement('span');lock.className='level-door-lock';lock.setAttribute('aria-hidden','true');lock.textContent='🔒';panel.append(lock)}
     if(completed){const done=document.createElement('span');done.className='level-door-complete';done.setAttribute('aria-hidden','true');done.textContent='✓';panel.append(done)}
     frame.append(panel);btn.append(frame);
     btn.addEventListener('click',()=>{if(locked)lockedDoorRemark();else start(i)});
