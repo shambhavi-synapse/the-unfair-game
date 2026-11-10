@@ -54,7 +54,7 @@ test('rear gate appears behind player and resets',()=>{
  game.start(33);assert.equal(game.snapshot().walls.length,original);
 });
 test('event metadata uses valid triggers and the original count is unchanged',()=>{
- assert.equal(levels.length,60);
+ assert.equal(levels.length,63);
  assert.deepEqual(validateLevels(),[]);
  for(const l of levels)for(const t of l.triggers)
    assert.ok(['collapse','spike','chase','delay','bridge','rearGate','relocateDoor'].includes(t[0]));
