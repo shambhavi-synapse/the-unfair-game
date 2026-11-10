@@ -77,7 +77,7 @@ export const levels=[
  L('The Last Door',{gaps:[[8,10],[16,18]],switches:[[12,21]],walls:[21],triggers:[['spike',13,15]],fallers:[19],fake:[20]}),
  L('Wrong Way Round',{width:28,reverseZones:[[8,17]],gaps:[[19,22]],spikes:[24]}),
  L('Second Opinion',{width:32,portals:[[11,22]],fake:[9],gaps:[[14,21]],spikes:[27]}),
- L('Windfall',{width:34,fans:[[8,21,175]],gaps:[[15,20]],spikes:[25,29]})
+ L('Windfall',{width:34,fans:[[8,21,175]],gaps:[[15,20]],spikes:[25,30]})
 ];
 export function validateLevels(){
  const errors=[];if(chapters.length!==15)errors.push('Expected 15 chapter definitions');if(levels.length!==63)errors.push(`Expected 63 levels, got ${levels.length}`);
