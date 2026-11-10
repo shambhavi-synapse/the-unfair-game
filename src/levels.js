@@ -12,10 +12,10 @@ export const badges=[
  {after:120,name:'The Audacity',line:"You're still here.",mark:'♜'},
  {after:150,name:'Now What?',line:'You can go now.',mark:'⌑'}
 ];
-const L=(name, data={})=>({name,width:24,gaps:[],spikes:[],crumble:[],blink:[],movers:[],switches:[],fallers:[],triggers:[],walls:[],fake:[],doorMode:'normal',exitTile:null,fakeOpensGate:false,bridge:null,roller:null,...data});
+const L=(name, data={})=>({name,width:24,gaps:[],spikes:[],crumble:[],blink:[],movers:[],switches:[],fallers:[],triggers:[],walls:[],fake:[],doorMode:'normal',exitRequiresTile:null,exitRequiresSwitches:false,exitTile:null,fakeOpensGate:false,bridge:null,roller:null,...data});
 // Exact coordinates, triggers and combinations are individually specified.
 export const levels=[
- L('An Easy Start',{doorMode:'shy',width:36,gaps:[[13,16],[27,29]],switches:[[21,25]],walls:[25],triggers:[['collapse',17,19]]}),
+ L('An Easy Start',{doorMode:'shy',exitRequiresTile:29,exitRequiresSwitches:true,width:36,gaps:[[13,16],[27,29]],switches:[[21,25]],walls:[25],triggers:[['collapse',17,19]]}),
  L('Just Keep Walking',{width:42,gaps:[[9,12],[20,23],[34,37]],bridge:{from:20,to:23,plate:17},crumble:[16,17],spikes:[29]}),
  L('The Floor Is Fine',{width:40,roller:{trigger:22,spawn:19,barrier:31},walls:[31],gaps:[],blink:[14,15],spikes:[35]}),
  L('A Minor Adjustment',{width:44,gaps:[[14,17],[28,31]],switches:[[10,24]],walls:[24],spikes:[35,39],triggers:[['collapse',18,20]]}),
@@ -82,6 +82,8 @@ export function validateLevels(){
   if(!l.name||typeof l.name!=='string')errors.push(`${i+1}: missing name`);
   for(const [a,b] of l.gaps){if(!(a>=3&&b<=l.width-2&&b>a))errors.push(`${i+1}: bad gap`)}
   for(const p of [...l.spikes,...l.crumble,...l.blink,...l.fallers,...l.fake])if(p<3||p>=l.width-2)errors.push(`${i+1}: bad tile ${p}`);
+  if(l.exitRequiresTile!==null&&(!Number.isInteger(l.exitRequiresTile)||l.exitRequiresTile<4||l.exitRequiresTile>=l.width-2))errors.push(`${i+1}: invalid exit clearance tile`);
+  if(l.exitRequiresSwitches&&!l.switches.length)errors.push(`${i+1}: exit requires switches but none exist`);
   if(l.exitTile!==null&&(l.exitTile<4||l.exitTile>=l.width-2||l.fake.includes(l.exitTile)))errors.push(`${i+1}: invalid alternate exit`);
   if(l.fakeOpensGate&&(!l.fake.length||!l.walls.length))errors.push(`${i+1}: fake door lacks gate`);
   if(l.doorMode!=='normal'&&l.doorMode!=='shy')errors.push(`${i+1}: invalid door mode`);
