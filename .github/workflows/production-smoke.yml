@@ -1,0 +1,45 @@
+name: Doorodo production smoke check
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify GitHub Pages serves newly merged game code
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          const root='https://shambhavi-synapse.github.io/the-unfair-game/';
+          let response,html,levels;
+          for(let attempt=1;attempt<=10;attempt++){
+            response=await fetch(root+'?live-check='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
+            html=await response.text();
+            const code=await fetch(root+'src/levels.js?live-check='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
+            levels=await code.text();
+            console.log('Attempt',attempt,'HTML HTTP',response.status,'levels HTTP',code.status,
+              'new version',html.includes('doorodo-expansion-20261110'),
+              'new levels',levels.includes("L('Windfall'"));
+            if(response.ok&&code.ok&&html.includes('doorodo-expansion-20261110')&&
+              levels.includes("L('Wrong Way Round'")&&levels.includes("L('Second Opinion'")&&
+              levels.includes("L('Windfall'"))break;
+            if(attempt<10)await new Promise(resolve=>setTimeout(resolve,10000));
+          }
+          assert.equal(response.status,200,'production HTML must be served');
+          assert.match(html,/doorodo-expansion-20261110/,'production HTML must reference new build');
+          assert.match(levels,/L\('Wrong Way Round'/);
+          assert.match(levels,/L\('Second Opinion'/);
+          assert.match(levels,/L\('Windfall'/);
+          const engine=await fetch(root+'src/main.js?live-check='+Date.now());
+          const engineText=await engine.text();
+          assert.equal(engine.status,200,'production engine must load');
+          assert.match(engineText,/portalCooldown/);
+          assert.match(engineText,/reverseActive/);
+          assert.doesNotMatch(engineText,/continuectx/);
+          console.log('PASS: Production HTML, 3 new levels, and engine fetched from public GitHub Pages');
+          JS
