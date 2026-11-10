@@ -52,3 +52,13 @@ Before expanding the roster, manually complete each new level on keyboard and to
 - Updated asset version query values so browsers request fresh CSS and JavaScript.
 - Added `tests/engine-level3.test.js` to execute the live engine's fixed-step movement and validate a successful route; `tests/level3.test.js` covers deterministic ball/gate models and waiting-area geometry.
 - Existing first-10 and levels 11–60 human playthroughs, mobile screenshots and GitHub Pages production verification remain unconfirmed. Do not describe this as complete game validation.
+
+## November 10: Landscape control / camera / door-identity patch
+
+- Removed the artificial progressive fog/shadow gradient entirely. The game now relies on standard camera scrolling and a uniform wide-screen zoom that limits how much world geometry appears at once. Landscape and portrait world objects remain drawn at the same scale in both directions.
+- Moved landscape coarse-pointer touch controls into a dedicated dock **below** the canvas. This avoids drawing the movement or jump controls on top of the playable platform. Retained safe-area insets.
+- Unified fake and real exit drawing through one `drawDoor` renderer, including identical dimensions and opacity. As a targeted variation, level 42 and 54 may place the real door before another decoy. Level 27's fake door can open its gate.
+- Removed the pre-trigger floor seam indicators and pre-trigger hanging ceiling objects. Cracks now appear only after collapse begins. Trigger timing is unchanged, so visual reaction fairness still needs human checks.
+- All **60** current level scripts were inspected using a static audit, written to `LEVEL_AUDIT_60.md`. Fifty are still one-screen maps and require individual redesign. This pass does **not** claim all 60 have been overhauled or played through.
+- Added code-level regression checks for natural camera, shared door rendering, and the control dock. Local adapted harness: **26 checks passed**; module syntax and level validator passed.
+- Headless Chromium local navigation did not complete and GitHub Pages production could not be independently fetched. No visual device or production deployment success is claimed.
