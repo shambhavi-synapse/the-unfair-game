@@ -12,7 +12,7 @@ export const badges=[
  {after:120,name:'The Audacity',line:"You're still here.",mark:'♜'},
  {after:150,name:'Now What?',line:'You can go now.',mark:'⌑'}
 ];
-const L=(name, data={})=>({name,width:24,gaps:[],spikes:[],crumble:[],blink:[],movers:[],switches:[],fallers:[],triggers:[],walls:[],fake:[],doorMode:'normal',bridge:null,roller:null,...data});
+const L=(name, data={})=>({name,width:24,gaps:[],spikes:[],crumble:[],blink:[],movers:[],switches:[],fallers:[],triggers:[],walls:[],fake:[],doorMode:'normal',exitTile:null,fakeOpensGate:false,bridge:null,roller:null,...data});
 // Exact coordinates, triggers and combinations are individually specified.
 export const levels=[
  L('An Easy Start',{doorMode:'shy',width:36,gaps:[[13,16],[27,29]],switches:[[21,25]],walls:[25],triggers:[['collapse',17,19]]}),
@@ -41,7 +41,7 @@ export const levels=[
  L('The Switchback',{switches:[[7,15]],walls:[15],spikes:[11,20]}),
  L('Give It a Second',{triggers:[['delay',9,13]],gaps:[[17,19]]}),
  L('Look Before Landing',{gaps:[[9,12]],fallers:[16],spikes:[19]}),
- L('The Fake Shortcut',{fake:[13],switches:[[9,20]],walls:[20]}),
+ L('The Fake Shortcut',{fake:[13],fakeOpensGate:true,switches:[[9,20]],walls:[20]}),
  L('Ride and Decide',{movers:[[8,12,3]],gaps:[[8,14]],spikes:[19]}),
  L('A Little Less Solid',{crumble:[7,8,14,15],blink:[11,12]}),
  L('The Rehearsal',{switches:[[8,19]],walls:[19],triggers:[['spike',12,15]],fallers:[17]}),
@@ -56,7 +56,7 @@ export const levels=[
  L('Floorless Logic',{gaps:[[8,11],[16,19]],movers:[[8,11,2],[16,19,2]]}),
  L('The Double Bluff',{triggers:[['delay',8,12]],fake:[17],spikes:[20]}),
  L('Old Habits',{crumble:[7,8],switches:[[12,19]],walls:[19],spikes:[16]}),
- L('Too Convenient',{fake:[14,18],fallers:[11,20]}),
+ L('Too Convenient',{fake:[14,18],exitTile:16,fallers:[11,20]}),
  L('The Second Switch',{switches:[[8,15],[17,21]],walls:[15,21],spikes:[12]}),
  L('Nothing Stays Put',{blink:[7,8,16,17],movers:[[10,13,2]],gaps:[[10,14]]}),
  L('A Very Nice Trap',{triggers:[['chase',8,12]],crumble:[14,15],spikes:[19]}),
@@ -68,7 +68,7 @@ export const levels=[
  L('Composure',{crumble:[7,8,9],fallers:[15,20],spikes:[12]}),
  L('Two Steps Ahead',{gaps:[[8,10],[16,18]],switches:[[12,21]],walls:[21]}),
  L('No More Hints',{blink:[8,9,14,15],triggers:[['delay',12,18]]}),
- L('Decoy Season',{fake:[10,16,20],spikes:[13]}),
+ L('Decoy Season',{fake:[10,16,20],exitTile:18,spikes:[13]}),
  L('The Narrow Escape',{gaps:[[8,11],[17,20]],movers:[[8,11,2],[17,20,2]]}),
  L('Full Circle',{switches:[[8,18]],walls:[18],crumble:[12,13],fallers:[16,21]}),
  L('The Hesitation',{triggers:[['chase',7,11],['delay',14,18]],spikes:[20]}),
@@ -82,6 +82,8 @@ export function validateLevels(){
   if(!l.name||typeof l.name!=='string')errors.push(`${i+1}: missing name`);
   for(const [a,b] of l.gaps){if(!(a>=3&&b<=l.width-2&&b>a))errors.push(`${i+1}: bad gap`)}
   for(const p of [...l.spikes,...l.crumble,...l.blink,...l.fallers,...l.fake])if(p<3||p>=l.width-2)errors.push(`${i+1}: bad tile ${p}`);
+  if(l.exitTile!==null&&(l.exitTile<4||l.exitTile>=l.width-2||l.fake.includes(l.exitTile)))errors.push(`${i+1}: invalid alternate exit`);
+  if(l.fakeOpensGate&&(!l.fake.length||!l.walls.length))errors.push(`${i+1}: fake door lacks gate`);
   if(l.doorMode!=='normal'&&l.doorMode!=='shy')errors.push(`${i+1}: invalid door mode`);
   if(l.bridge && (l.bridge.plate>=l.bridge.from || !l.gaps.some(([a,b])=>a<=l.bridge.from&&b>=l.bridge.to)))errors.push(`${i+1}: bridge placement invalid`);
   if(l.roller && (!l.walls.includes(l.roller.barrier)||l.roller.spawn>=l.roller.trigger||l.roller.trigger>=l.roller.barrier))errors.push(`${i+1}: roller placement invalid`);
