@@ -105,7 +105,7 @@ const fans=def.fans.map(([a,z,strength])=>({x:a*TILE,w:(z-a)*TILE,strength}));
 const triggers=def.triggers.map(([kind,x,target])=>({kind,x:x*TILE,target:target*TILE,done:false,clock:0}));
 return {floors,crumble,blink,walls,switches,spikes,fallers,movers,fake,triggers,door:range(def.exitTile!==null?def.exitTile*TILE:def.doorMode==='shy'?(def.width-7)*TILE:def.width*TILE-57,FLOOR-62,35,62),width:def.width*TILE,chaser:null,eventBridges:[],reverseZones,portals,fans,bridge,roller,doorMode:def.doorMode,doorMinX:def.exitRequiresTile!==null?def.exitRequiresTile*TILE:0,doorMaxX:def.width*TILE-45};
 }
-function start(i,retry=false){if(i<0||i>=levels.length||i+1>save.unlocked)return;levelIndex=i;level=levels[i];objects=buildLevel(i);player={x:64,y:FLOOR-PY,w:PX,h:PY,vx:0,vy:0,grounded:false,coyote:0,buffer:0,jumpHeld:false,face:1,squash:0,portalCooldown:0};t=0;camera=0;deathAt=0;if(!retry)levelDeaths=0;acc=0;dead=false;finished=false;paused=false;flash=0;shake=0;toastUntil=0;$('toast').classList.remove('show');$('overlay').classList.add('hidden');$('chapter-name').textContent=`CHAPTER ${Math.floor(i/10)+1} · ${chapters[Math.floor(i/10)][0]}`;$('level-name').textContent=`${i+1}. ${level.name}`;updateDeaths();show('game');}
+function start(i,retry=false){if(i<0||i>=levels.length||i+1>save.unlocked)return;levelIndex=i;level=levels[i];objects=buildLevel(i);player={x:64,y:FLOOR-PY,w:PX,h:PY,vx:0,vy:0,grounded:false,coyote:0,buffer:0,jumpHeld:false,face:1,squash:0,portalCooldown:0,reverseActive:false};t=0;camera=0;deathAt=0;if(!retry)levelDeaths=0;acc=0;dead=false;finished=false;paused=false;flash=0;shake=0;toastUntil=0;$('toast').classList.remove('show');$('overlay').classList.add('hidden');$('chapter-name').textContent=`CHAPTER ${Math.floor(i/10)+1} · ${chapters[Math.floor(i/10)][0]}`;$('level-name').textContent=`${i+1}. ${level.name}`;updateDeaths();show('game');}
 function updateDeaths(){$('death-counter').textContent=`☠ ${save.deaths}`}
 function overlay(title,desc,buttons){$('overlay-title').textContent=title;$('overlay-desc').textContent=desc;const el=$('overlay-actions');el.replaceChildren();for(const [label,fn,primary] of buttons){const b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.addEventListener('click',fn);el.append(b)}$('overlay').classList.remove('hidden')}
 function die(){if(dead||finished)return;dead=true;deathAt=t;save.deaths++;levelDeaths++;persist();updateDeaths();flash=.17;shake=save.motion?6:0;sound(170,.16,'sawtooth');const startDistance=player.x<160;const nearDoor=player.x>objects.door.x-180;const line=nearDoor&&levelDeaths===3?'So close.':startDistance&&levelDeaths===2?'Efficient.':levelDeaths===6?'Familiar territory.':null;
@@ -114,7 +114,11 @@ function win(){if(dead||finished)return;finished=true;sound(630,.17,'triangle');
 function handleJump(pressed){if(pressed&&!keys.jump&&player)player.buffer=.12;keys.jump=pressed}
 function physics(dt){if(!player||dead||finished||paused)return;t+=dt;const p=player,o=objects;
  p.buffer=Math.max(0,p.buffer-dt);p.coyote=p.grounded?.095:Math.max(0,p.coyote-dt);p.squash=Math.max(0,p.squash-dt);
- const reversed=o.reverseZones.some(z=>p.x+p.w/2>=z.x&&p.x+p.w/2<z.x+z.w);
+ // Retain inversion on the entry seam to prevent an oscillating input lock.
+ const zone=o.reverseZones.find(z=>p.x+p.w/2>=z.x&&p.x+p.w/2<z.x+z.w);
+ if(zone)p.reverseActive=true;
+ else if(!o.reverseZones.some(z=>p.x+p.w/2>=z.x-40&&p.x+p.w/2<z.x+z.w))p.reverseActive=false;
+ const reversed=p.reverseActive;
  const move=(Number(keys.right)-Number(keys.left))*(reversed?-1:1);
  p.portalCooldown=Math.max(0,p.portalCooldown-dt);
  const wind=o.fans.reduce((force,z)=>p.x+p.w/2>=z.x&&p.x+p.w/2<z.x+z.w?force+z.strength:force,0);
