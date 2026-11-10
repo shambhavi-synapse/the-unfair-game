@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {levels,validateLevels} from '../src/levels.js';
 
-test('all sixty level definitions remain structurally valid',()=>{
- assert.equal(levels.length,60);
+test('all 63 level definitions remain structurally valid',()=>{
+ assert.equal(levels.length,63);
  assert.deepEqual(validateLevels(),[]);
 });
 test('real exits do not always follow every fake exit',()=>{
