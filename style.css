@@ -65,3 +65,17 @@ h1{letter-spacing:-.055em}h1 em{color:#f17268}
  #mobile button[data-control]{width:56px;height:52px;font-size:22px;}
  #game-wrap #overlay{z-index:5}
 }
+
+/* Doorodo landscape control dock: controls never cover playable terrain. */
+@media (pointer:coarse) and (orientation:landscape){
+ #game{display:flex;flex-direction:column;padding:env(safe-area-inset-top) max(6px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(6px,env(safe-area-inset-left));}
+ #hud{flex:0 0 40px;height:40px}
+ #game-wrap{flex:1 1 auto;width:100%;min-height:0;max-width:none}
+ #mobile{position:relative;inset:auto;width:100%;display:flex;justify-content:space-between;align-items:center;flex:0 0 60px;margin:0;padding:3px max(12px,env(safe-area-inset-right)) 3px max(12px,env(safe-area-inset-left));pointer-events:auto;background:#191a28}
+ #mobile button[data-control]{width:58px;height:52px;opacity:1;pointer-events:auto;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;font-size:23px}
+ #mobile .mobile-left{gap:12px}
+ #hint{display:none}
+}
+@media (pointer:coarse) and (orientation:portrait){
+ #mobile{padding-inline:max(7px,env(safe-area-inset-left)) max(7px,env(safe-area-inset-right));}
+}
