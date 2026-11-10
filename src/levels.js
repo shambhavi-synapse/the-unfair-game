@@ -30,7 +30,7 @@ export const levels=[
  L('The Welcome Mat',{triggers:[['spike',9,12]],spikes:[18]}),
  L('Mind the Ceiling',{fallers:[9,17],gaps:[[12,14]]}),
  L('Wrong Address',{fake:[17],spikes:[11]}),
- L('A Short Detour',{gaps:[[7,9],[16,18]],crumble:[12]}),
+ L('A Short Detour',{gaps:[[7,9],[16,18]],crumble:[12],triggers:[['bridge',12,16]]}),
  L('Stand Still',{triggers:[['chase',9,12]],spikes:[19]}),
  L('Moving Target',{movers:[[9,11,3]],gaps:[[9,13]]}),
  L('The Patient Path',{blink:[11,12,13],spikes:[18]}),
@@ -38,8 +38,8 @@ export const levels=[
  L('Press for Trouble',{switches:[[9,17]],walls:[17]}),
  L('Second Thoughts',{gaps:[[8,11]],switches:[[14,19]],walls:[19]}),
  L('Time It Right',{blink:[7,8,15,16],spikes:[20]}),
- L('The Switchback',{switches:[[7,15]],walls:[15],spikes:[11,20]}),
- L('Give It a Second',{triggers:[['delay',9,13]],gaps:[[17,19]]}),
+ L('The Switchback',{switches:[[7,15]],walls:[15],spikes:[11,20],triggers:[['relocateDoor',16,12]]}),
+ L('Give It a Second',{triggers:[['delay',9,13]],gaps:[[17,19]],triggers:[['delay',9,13],['bridge',15,17]]}),
  L('Look Before Landing',{gaps:[[9,12]],fallers:[16],spikes:[19]}),
  L('The Fake Shortcut',{fake:[13],fakeOpensGate:true,switches:[[9,20]],walls:[20]}),
  L('Ride and Decide',{movers:[[8,12,3]],gaps:[[8,14]],spikes:[19]}),
@@ -48,7 +48,7 @@ export const levels=[
  L('No Sudden Moves',{triggers:[['chase',8,11]],gaps:[[16,18]]}),
  L('Falling for It',{fallers:[8,12,19],crumble:[15]}),
  L('Familiar Shapes',{spikes:[7,20],blink:[11,12],fake:[17]}),
- L('Plan B',{switches:[[12,18]],walls:[18],gaps:[[8,10]],spikes:[15]}),
+ L('Plan B',{switches:[[12,18]],walls:[18],gaps:[[8,10]],spikes:[15],triggers:[['rearGate',12,10]]}),
  L('The Retreat',{triggers:[['spike',10,13]],fallers:[17],spikes:[20]}),
  L('Not the Same Door',{fake:[19],gaps:[[9,11]],crumble:[15]}),
  L('Wait for the Rhythm',{blink:[8,9,15,16],fallers:[20]}),
@@ -62,7 +62,7 @@ export const levels=[
  L('A Very Nice Trap',{triggers:[['chase',8,12]],crumble:[14,15],spikes:[19]}),
  L('One Step Back',{switches:[[7,19]],walls:[19],fallers:[11,16],spikes:[14]}),
  L('Remember the Gap',{gaps:[[8,11],[17,19]],blink:[13,14]}),
- L('A Door-Shaped Lie',{fake:[12,17],triggers:[['spike',18,20]]}),
+ L('A Door-Shaped Lie',{fake:[12,17],triggers:[['relocateDoor',15,10],['spike',18,20]]}),
  L('Less Than Helpful',{fallers:[7,13,19],blink:[10,11,16]}),
  L('The Examination',{switches:[[9,20]],walls:[20],gaps:[[13,15]],fallers:[17],spikes:[11]}),
  L('Composure',{crumble:[7,8,9],fallers:[15,20],spikes:[12]}),
@@ -71,9 +71,9 @@ export const levels=[
  L('Decoy Season',{fake:[10,16,20],exitTile:18,spikes:[13]}),
  L('The Narrow Escape',{gaps:[[8,11],[17,20]],movers:[[8,11,2],[17,20,2]]}),
  L('Full Circle',{switches:[[8,18]],walls:[18],crumble:[12,13],fallers:[16,21]}),
- L('The Hesitation',{triggers:[['chase',7,11],['delay',14,18]],spikes:[20]}),
+ L('The Hesitation',{triggers:[['chase',7,11],['delay',14,18]],spikes:[20],triggers:[['chase',7,11],['rearGate',11,5],['delay',14,18]]}),
  L('The Unwelcome Reunion',{blink:[7,8,16,17],fallers:[11,19],fake:[14]}),
- L('Everything You Know',{switches:[[8,20]],walls:[20],gaps:[[12,14]],fallers:[16],crumble:[18],spikes:[10]}),
+ L('Everything You Know',{switches:[[8,20]],walls:[20],gaps:[[12,14]],fallers:[16],crumble:[18],spikes:[10],triggers:[['bridge',11,12]]}),
  L('The Last Door',{gaps:[[8,10],[16,18]],switches:[[12,21]],walls:[21],triggers:[['spike',13,15]],fallers:[19],fake:[20]})
 ];
 export function validateLevels(){
@@ -87,7 +87,13 @@ export function validateLevels(){
   if(l.doorMode!=='normal'&&l.doorMode!=='shy')errors.push(`${i+1}: invalid door mode`);
   if(l.bridge && (l.bridge.plate>=l.bridge.from || !l.gaps.some(([a,b])=>a<=l.bridge.from&&b>=l.bridge.to)))errors.push(`${i+1}: bridge placement invalid`);
   if(l.roller && (!l.walls.includes(l.roller.barrier)||l.roller.spawn>=l.roller.trigger||l.roller.trigger>=l.roller.barrier))errors.push(`${i+1}: roller placement invalid`);
-  for(const tr of l.triggers){if(tr[0]==='collapse'&&(tr[2]<3||tr[2]+1>=l.width-2))errors.push(`${i+1}: bad collapse trigger`)}
+  for(const tr of l.triggers){
+    if(!['collapse','spike','chase','delay','bridge','rearGate','relocateDoor'].includes(tr[0]))errors.push(`${i+1}: unknown event type ${tr[0]}`);
+    if(tr[0]==='collapse'&&(tr[2]<3||tr[2]+1>=l.width-2))errors.push(`${i+1}: bad collapse trigger`);
+    if(['bridge','rearGate','relocateDoor'].includes(tr[0])&&(tr[2]<3||tr[2]>=l.width-2))errors.push(`${i+1}: event target outside level`);
+    if(tr[0]==='bridge'&&!l.gaps.some(([a,b])=>a<=tr[2]&&b>tr[2]))errors.push(`${i+1}: bridge not placed over a gap`);
+    if(tr[0]==='rearGate'&&tr[2]>=tr[1])errors.push(`${i+1}: rear gate must rise behind player`);
+  }
   for(const [x,w] of l.switches){if(x<3||x>=l.width-2||w<=x||w>=l.width-1)errors.push(`${i+1}: invalid switch`)}
  });return errors;
 }
