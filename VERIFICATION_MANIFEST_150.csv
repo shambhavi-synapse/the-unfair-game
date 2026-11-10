@@ -59,9 +59,9 @@ level,chapter,chapter_name,level_name,code_implemented,definition_validated,reco
 "58","6","A Matter of Timing","The Unwelcome Reunion","yes","yes","no","no","no","existing-production-level-unverified"
 "59","6","A Matter of Timing","Everything You Know","yes","yes","no","no","no","existing-production-level-unverified"
 "60","6","A Matter of Timing","The Last Door","yes","yes","no","no","yes","existing-production-level-unverified"
-"61","7","Trust the Process","The Conveyor That Apologised","no","no","no","no","no","design-only-not-in-game"
-"62","7","Trust the Process","The Backward Instruction","no","no","no","no","no","design-only-not-in-game"
-"63","7","Trust the Process","A Door with a Schedule","no","no","no","no","no","design-only-not-in-game"
+"61","7","Trust the Process","Wrong Way Round","yes","yes","yes","no","no","existing-production-level-unverified
+"62","7","Trust the Process","Second Opinion","yes","yes","yes","no","no","existing-production-level-unverified
+"63","7","Trust the Process","Windfall","yes","yes","yes","no","no","existing-production-level-unverified
 "64","7","Trust the Process","Assisted Failure","no","no","no","no","no","design-only-not-in-game"
 "65","7","Trust the Process","Shift Handover","no","no","no","no","no","design-only-not-in-game"
 "66","7","Trust the Process","Risk Assessment","no","no","no","no","no","design-only-not-in-game"
