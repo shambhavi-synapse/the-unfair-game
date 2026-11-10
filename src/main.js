@@ -3,7 +3,7 @@ import {levels,chapters,badges,validateLevels} from './levels.js';
 const $=id=>document.getElementById(id), C=$('canvas'),ctx=C.getContext('2d');
 let W=960;const H=540, FLOOR=468, TILE=40, PX=24,PY=32, DT=1/120;
 const storeKey='unfair-game-v1';
-const load=()=>{try{const s=JSON.parse(localStorage.getItem(storeKey)||'{}');return {unlocked:Math.max(1,Math.min(60,Number(s.unlocked)||1)),deaths:Math.max(0,Number(s.deaths)||0),sound:s.sound!==false,motion:s.motion!==false,commentary:s.commentary!==false,badges:Array.isArray(s.badges)?s.badges:[]}}catch{return {unlocked:1,deaths:0,sound:true,motion:true,commentary:true,badges:[]}}};
+const load=()=>{try{const s=JSON.parse(localStorage.getItem(storeKey)||'{}');return {unlocked:Math.max(1,Math.min(levels.length,Number(s.unlocked)||1)),deaths:Math.max(0,Number(s.deaths)||0),sound:s.sound!==false,motion:s.motion!==false,commentary:s.commentary!==false,badges:Array.isArray(s.badges)?s.badges:[]}}catch{return {unlocked:1,deaths:0,sound:true,motion:true,commentary:true,badges:[]}}};
 let lastGameplayRemarkAt=0;let lastRenderDelta=1/60;let save=load(),camera=0,deathAt=0,screen='menu',levelDeaths=0,levelIndex=0,level=null,player=null,objects=null,t=0,dead=false,finished=false,paused=false,last=0,acc=0,toastUntil=0,toastText='',flash=0,shake=0;
 const keys={left:false,right:false,jump:false};
 let landscapeDismissed=false;
@@ -100,7 +100,7 @@ const fake=def.fake.map(n=>({x:n*TILE,y:FLOOR-62,w:35,h:62,used:false}));
 const bridge=def.bridge?{...def.bridge,active:false,plate:{x:def.bridge.plate*TILE+5,y:FLOOR-15,w:30,h:15}}:null;
 const roller=def.roller?{...def.roller,x:def.roller.spawn*TILE,y:FLOOR-40,w:40,h:40,speed:165,active:false,started:false,spent:false}:null;
 const triggers=def.triggers.map(([kind,x,target])=>({kind,x:x*TILE,target:target*TILE,done:false,clock:0}));
-return {floors,crumble,blink,walls,switches,spikes,fallers,movers,fake,triggers,door:range(def.exitTile!==null?def.exitTile*TILE:def.doorMode==='shy'?(def.width-7)*TILE:def.width*TILE-57,FLOOR-62,35,62),width:def.width*TILE,chaser:null,eventBridges:[],bridge,roller,doorMode:def.doorMode,doorMaxX:def.width*TILE-45};
+return {floors,crumble,blink,walls,switches,spikes,fallers,movers,fake,triggers,door:range(def.exitTile!==null?def.exitTile*TILE:def.doorMode==='shy'?(def.width-7)*TILE:def.width*TILE-57,FLOOR-62,35,62),width:def.width*TILE,chaser:null,eventBridges:[],bridge,roller,doorMode:def.doorMode,doorMinX:def.exitRequiresTile!==null?def.exitRequiresTile*TILE:0,doorMaxX:def.width*TILE-45};
 }
 function start(i,retry=false){if(i<0||i>=levels.length||i+1>save.unlocked)return;levelIndex=i;level=levels[i];objects=buildLevel(i);player={x:64,y:FLOOR-PY,w:PX,h:PY,vx:0,vy:0,grounded:false,coyote:0,buffer:0,jumpHeld:false,face:1,squash:0};t=0;camera=0;deathAt=0;if(!retry)levelDeaths=0;acc=0;dead=false;finished=false;paused=false;flash=0;shake=0;toastUntil=0;$('toast').classList.remove('show');$('overlay').classList.add('hidden');$('chapter-name').textContent=`CHAPTER ${Math.floor(i/10)+1} · ${chapters[Math.floor(i/10)][0]}`;$('level-name').textContent=`${i+1}. ${level.name}`;updateDeaths();show('game');}
 function updateDeaths(){$('death-counter').textContent=`☠ ${save.deaths}`}
@@ -117,7 +117,7 @@ function physics(dt){if(!player||dead||finished||paused)return;t+=dt;const p=pla
  p.vy=Math.min(740,p.vy+1190*dt);
  const activeBlink=b=>Math.sin(t*2.5*Math.PI+b.phase*Math.PI*2)>=-.3;
  for(const m of o.movers){m.prevX=m.x;m.x+=m.dir*m.speed*dt;if(m.x<m.min){m.x=m.min;m.dir=1}if(m.x>m.max){m.x=m.max;m.dir=-1}}
- if(o.doorMode==='shy')o.door=updateShyDoor(o.door,p,dt,{maxX:o.doorMaxX});
+ if(o.doorMode==='shy')o.door=updateShyDoor(o.door,p,dt,{minX:o.doorMinX,maxX:o.doorMaxX});
  if(o.bridge&&!o.bridge.active&&bridgeActivated(o.bridge.plate,p)){o.bridge.active=true;sound(540,.08,'triangle');}
  if(o.roller){
    const ball=o.roller;
@@ -160,7 +160,9 @@ if(tr.kind==='spike'){o.spikes.push({...range(tr.target+8,FLOOR-22,24,22),born:t
  if(o.chaser){o.chaser.x+=115*dt;if(overlaps(p,o.chaser))die()}
  for(const sp of o.spikes)if((sp.born===undefined||t>=sp.born)&&overlaps(p,sp))die();
  for(const f of o.fake)if(!f.used&&overlaps(p,f)){f.used=true;if(level.fakeOpensGate){o.walls.forEach(w=>w.opened=true);say('WELL, THAT WORKED.',.8)}else if(save.commentary!==false)say('NOT THIS ONE.',.8);sound(170,.13)}
- if(p.y>H+10)die();if(overlaps(p,o.door)&&(o.doorMode!=='shy'||Math.abs(p.vx)<15))win();
+ if(p.y>H+10)die();const crossedRequiredTerrain=level.exitRequiresTile===null||p.x+p.w/2>=level.exitRequiresTile*TILE;
+ const openedRequiredSwitches=!level.exitRequiresSwitches||o.switches.every(sw=>sw.active);
+ if(crossedRequiredTerrain&&openedRequiredSwitches&&overlaps(p,o.door)&&(o.doorMode!=='shy'||Math.abs(p.vx)<15))win();
  }
 function render(){if(screen!=='game'||!player)return;const p=player,o=objects,chapter=Math.floor(levelIndex/10),colors=['#2a3043','#2c3440','#353043','#2c3840','#34303c','#303344'];ctx.save();ctx.clearRect(0,0,W,H);ctx.fillStyle=colors[chapter]||colors[0];ctx.fillRect(0,0,W,H);
  const zoom=Math.max(1,Math.min(1.78,W/980));
