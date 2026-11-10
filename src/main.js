@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id), C=$('canvas'),ctx=C.getContext('2d');
 let W=960;const H=540, FLOOR=468, TILE=40, PX=24,PY=32, DT=1/120;
 const storeKey='unfair-game-v1';
 const load=()=>{try{const s=JSON.parse(localStorage.getItem(storeKey)||'{}');return {unlocked:Math.max(1,Math.min(60,Number(s.unlocked)||1)),deaths:Math.max(0,Number(s.deaths)||0),sound:s.sound!==false,motion:s.motion!==false,commentary:s.commentary!==false,badges:Array.isArray(s.badges)?s.badges:[]}}catch{return {unlocked:1,deaths:0,sound:true,motion:true,commentary:true,badges:[]}}};
-let lastRenderDelta=1/60;let save=load(),camera=0,screen='menu',levelDeaths=0,levelIndex=0,level=null,player=null,objects=null,t=0,dead=false,finished=false,paused=false,last=0,acc=0,toastUntil=0,toastText='',flash=0,shake=0;
+let lastGameplayRemarkAt=0;let lastRenderDelta=1/60;let save=load(),camera=0,screen='menu',levelDeaths=0,levelIndex=0,level=null,player=null,objects=null,t=0,dead=false,finished=false,paused=false,last=0,acc=0,toastUntil=0,toastText='',flash=0,shake=0;
 const keys={left:false,right:false,jump:false};
 let landscapeDismissed=false;
 function updateLandscapeTip(){
@@ -40,7 +40,53 @@ const sound=(frequency=300,duration=.06,type='sine')=>{if(!save.sound)return;try
 function say(message,seconds=1.2){toastText=message;toastUntil=t+seconds;$('toast').textContent=message;$('toast').classList.add('show')}
 function show(name){screen=name;for(const id of ['menu','levels','settings-screen','game','badges-screen','about-screen'])$(id).classList.toggle('hidden',id!==(name==='settings'?'settings-screen':name==='badges'?'badges-screen':name==='about'?'about-screen':name));if(name==='levels')renderLevels();if(name==='badges')renderBadges();updateLandscapeTip();if(name==='game'){$('sound').checked=save.sound;requestAnimationFrame(resizeGame);requestAnimationFrame(updateLandscapeTip)}else{for(const k of Object.keys(keys))keys[k]=false}}
 function renderBadges(){const el=$('badges-grid');el.replaceChildren();for(const badge of badges){const earned=save.badges.includes(badge.after)||save.unlocked>badge.after;const item=document.createElement('article');item.className='badge-card'+(earned?'':' locked');const medal=document.createElement('div');medal.className='badge-medal';medal.textContent=earned?badge.mark:'?';const name=document.createElement('h3');name.textContent=earned?badge.name:'???';const caption=document.createElement('p');caption.textContent=earned?badge.line:`Complete Chapter ${badge.after/10} to reveal`;item.append(medal,name,caption);el.append(item)}}
-function renderLevels(){const el=$('chapters');el.replaceChildren();$('unlocked-counter').textContent=`${save.unlocked}/${levels.length} UNLOCKED`;chapters.forEach(([label,diff],ch)=>{const wrap=document.createElement('section');wrap.className='chapter';const head=document.createElement('div');head.className='chapter-head';const heading=document.createElement('h3');heading.textContent=`${String(ch+1).padStart(2,'0')} · ${label}`;const subtitle=document.createElement('span');subtitle.textContent=ch*10>=levels.length?'IN DEVELOPMENT':diff;head.append(heading,subtitle);const tiles=document.createElement('div');tiles.className='tiles';if(ch*10>=levels.length){const p=document.createElement('p');p.textContent='More doors are being built. No shortcuts.';p.style.color='#a5a4b7';tiles.append(p)}else{for(let i=ch*10;i<Math.min((ch+1)*10,levels.length);i++){const b=document.createElement('button');b.className='tile'+(i+1<save.unlocked?' done':i+1===save.unlocked?' next':'');b.textContent=i+1;b.disabled=i+1>save.unlocked;b.setAttribute('aria-label',`Level ${i+1}: ${levels[i].name}${b.disabled?' locked':''}`);b.addEventListener('click',()=>start(i));tiles.append(b)}}wrap.append(head,tiles);el.append(wrap)})}
+let lastLockedRemarkAt=0, lockedRemarkCount=0;
+function lockedDoorRemark(){
+ const now=Date.now();
+ if(now-lastLockedRemarkAt<3500)return;
+ lastLockedRemarkAt=now;
+ const lines=['Try the previous door.','Not on the list.','Your confidence is noted.'];
+ const notice=$('locked-notice');
+ notice.textContent=lines[Math.min(Math.floor(lockedRemarkCount/2),lines.length-1)];
+ lockedRemarkCount++;
+}
+function renderLevels(){
+ const el=$('chapters');el.replaceChildren();
+ $('unlocked-counter').textContent=`${save.unlocked}/${levels.length} UNLOCKED`;
+ $('locked-notice').textContent='';
+ chapters.forEach(([label,diff],ch)=>{
+  const wrap=document.createElement('section');wrap.className='chapter';
+  const head=document.createElement('div');head.className='chapter-head';
+  const heading=document.createElement('h3');heading.textContent=`${String(ch+1).padStart(2,'0')} · ${label}`;
+  const subtitle=document.createElement('span');
+  if(ch*10>=levels.length){subtitle.textContent='IN DEVELOPMENT'}
+  else{const completed=Math.max(0,Math.min(10,save.unlocked-1-ch*10));subtitle.textContent=`${completed}/10 COMPLETE`}
+  head.append(heading,subtitle);
+  const tiles=document.createElement('div');tiles.className='tiles door-grid';
+  if(ch*10>=levels.length){
+   const p=document.createElement('p');p.className='chapter-unbuilt';p.textContent='More doors are being built. No shortcuts.';tiles.append(p)
+  }else{
+   for(let i=ch*10;i<Math.min((ch+1)*10,levels.length);i++){
+    const locked=i+1>save.unlocked,completed=i+1<save.unlocked;
+    const btn=document.createElement('button');
+    btn.type='button';btn.className='level-door'+(completed?' done':locked?' locked':' next');
+    btn.setAttribute('aria-label',`Level ${i+1}: ${levels[i].name}, ${locked?'locked':completed?'completed':'unlocked'}`);
+    if(locked)btn.setAttribute('aria-disabled','true');
+    const frame=document.createElement('span');frame.className='level-door-frame';
+    const panel=document.createElement('span');panel.className='level-door-panel';
+    const number=document.createElement('span');number.className='level-door-number';number.textContent=i+1;
+    const knob=document.createElement('span');knob.className='level-door-knob';
+    panel.append(number,knob);
+    if(locked){const lock=document.createElement('span');lock.className='level-door-lock';lock.setAttribute('aria-hidden','true');lock.textContent='♙';panel.append(lock)}
+    if(completed){const done=document.createElement('span');done.className='level-door-complete';done.setAttribute('aria-hidden','true');done.textContent='✓';panel.append(done)}
+    frame.append(panel);btn.append(frame);
+    btn.addEventListener('click',()=>{if(locked)lockedDoorRemark();else start(i)});
+    tiles.append(btn);
+   }
+  }
+  wrap.append(head,tiles);el.append(wrap)
+ });
+}
 const solid=(x,y,w,h,kind='floor',extra={})=>({x,y,w,h,kind,...extra});
 function buildLevel(i){const def=levels[i];const gaps=def.gaps;const floors=[];for(let tile=0;tile<def.width;tile++){if(gaps.some(([a,b])=>tile>=a&&tile<b))continue;floors.push(solid(tile*TILE,FLOOR,TILE,H-FLOOR,'ground'))}
 const crumble=def.crumble.map(n=>solid(n*TILE,FLOOR,TILE,H-FLOOR,'crumble',{timer:-1,fallen:false}));for(const c of crumble){const idx=floors.findIndex(f=>f.x===c.x);if(idx>=0)floors.splice(idx,1)}
@@ -59,8 +105,9 @@ return {floors,crumble,blink,walls,switches,spikes,fallers,movers,fake,triggers,
 function start(i,retry=false){if(i<0||i>=levels.length||i+1>save.unlocked)return;levelIndex=i;level=levels[i];objects=buildLevel(i);player={x:64,y:FLOOR-PY,w:PX,h:PY,vx:0,vy:0,grounded:false,coyote:0,buffer:0,jumpHeld:false,face:1,squash:0};t=0;camera=0;if(!retry)levelDeaths=0;acc=0;dead=false;finished=false;paused=false;flash=0;shake=0;toastUntil=0;$('toast').classList.remove('show');$('overlay').classList.add('hidden');$('chapter-name').textContent=`CHAPTER ${Math.floor(i/10)+1} · ${chapters[Math.floor(i/10)][0]}`;$('level-name').textContent=`${i+1}. ${level.name}`;updateDeaths();show('game');}
 function updateDeaths(){$('death-counter').textContent=`☠ ${save.deaths}`}
 function overlay(title,desc,buttons){$('overlay-title').textContent=title;$('overlay-desc').textContent=desc;const el=$('overlay-actions');el.replaceChildren();for(const [label,fn,primary] of buttons){const b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.addEventListener('click',fn);el.append(b)}$('overlay').classList.remove('hidden')}
-function die(){if(dead||finished)return;dead=true;save.deaths++;levelDeaths++;persist();updateDeaths();flash=.17;shake=save.motion?6:0;sound(170,.16,'sawtooth');const startDistance=player.x<160;const nearDoor=player.x>objects.door.x-180;const line=startDistance&&levelDeaths===1?'Efficient.':nearDoor&&levelDeaths===3?'So close.':levelDeaths===6?"You've made yourself comfortable.":null;if(line&&save.commentary!==false)say(line,.8);}
-function win(){if(dead||finished)return;finished=true;sound(630,.17,'triangle');const complete=levelIndex+1;save.unlocked=Math.max(save.unlocked,Math.min(levels.length,complete+1));const earned=badges.find(b=>b.after===complete&&!save.badges.includes(b.after));if(earned)save.badges.push(earned.after);persist();if(earned){overlay(earned.name,earned.line,[[complete===levels.length?'LEVEL SELECT':'NEXT LEVEL →',()=>complete===levels.length?show('levels'):start(levelIndex+1),true],['BADGES',()=>show('badges'),false]])}else if(complete===levels.length){overlay('A TEMPORARY END.','More chapters are in development. The door can wait.',[['LEVEL SELECT',()=>show('levels'),true],['PLAY AGAIN',()=>start(0),false]])}else{overlay(complete%10===0?'CHAPTER COMPLETE.':'DOOR FOUND.',complete%10===0?'That was almost respectable.':'Carry on.',[['NEXT LEVEL →',()=>start(levelIndex+1),true],['LEVEL SELECT',()=>show('levels'),false]])}}
+function die(){if(dead||finished)return;dead=true;save.deaths++;levelDeaths++;persist();updateDeaths();flash=.17;shake=save.motion?6:0;sound(170,.16,'sawtooth');const startDistance=player.x<160;const nearDoor=player.x>objects.door.x-180;const line=nearDoor&&levelDeaths===3?'So close.':startDistance&&levelDeaths===2?'Efficient.':levelDeaths===6?'Familiar territory.':null;
+ if(line&&save.commentary!==false&&Date.now()-lastGameplayRemarkAt>12000){lastGameplayRemarkAt=Date.now();say(line,.8);}}
+function win(){if(dead||finished)return;finished=true;sound(630,.17,'triangle');const complete=levelIndex+1;save.unlocked=Math.max(save.unlocked,Math.min(levels.length,complete+1));const earned=badges.find(b=>b.after===complete&&!save.badges.includes(b.after));if(earned)save.badges.push(earned.after);persist();if(earned){overlay(earned.name,earned.line,[[complete===levels.length?'LEVEL SELECT':'NEXT LEVEL →',()=>complete===levels.length?show('levels'):start(levelIndex+1),true],['BADGES',()=>show('badges'),false]])}else if(complete===levels.length){overlay('A TEMPORARY END.','More chapters are in development. The door can wait.',[['LEVEL SELECT',()=>show('levels'),true],['PLAY AGAIN',()=>start(0),false]])}else{overlay(complete%10===0?'CHAPTER COMPLETE.':'DOOR FOUND.',complete%10===0?'That was almost respectable.':levelDeaths===0?'Interesting.':levelDeaths>=6?'Eventually.':'Carry on.',[['NEXT LEVEL →',()=>start(levelIndex+1),true],['LEVEL SELECT',()=>show('levels'),false]])}}
 function handleJump(pressed){if(pressed&&!keys.jump&&player)player.buffer=.12;keys.jump=pressed}
 function physics(dt){if(!player||dead||finished||paused)return;t+=dt;const p=player,o=objects;
  p.buffer=Math.max(0,p.buffer-dt);p.coyote=p.grounded?.095:Math.max(0,p.coyote-dt);p.squash=Math.max(0,p.squash-dt);
