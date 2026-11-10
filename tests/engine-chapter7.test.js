@@ -51,7 +51,7 @@ function simulate(index,steer,maxSteps=2200){
    if(stage===0&&z.x>=510&&z.grounded){stage=1;jumpUntil=t+.27}
    if(z.x>810&&z.grounded)sawLastGap=true;
    if(stage===1&&z.x>=935&&z.grounded&&t>jumpUntil+.1){stage=2;jumpUntil=t+.27}
-   if(stage===2&&z.x>=1095&&z.grounded&&t>jumpUntil+.1){stage=3;jumpUntil=t+.27}
+   if(stage===2&&z.x>=1150&&z.grounded&&t>jumpUntil+.1){stage=3;jumpUntil=t+.27}
    game.keys.right=true;game.keys.left=false;
    game.handleJump([1,2,3].includes(stage)&&t<jumpUntil);
   }
