@@ -40,3 +40,15 @@
 
 ## Quality gate for next pass
 Before expanding the roster, manually complete each new level on keyboard and touch. Record a successful run and a hold-right failure; check reset invariants, player reaction time, and portrait/landscape visibility. Discard traps that cannot provide a meaningful decision.
+
+## November 10, 2026: Level 3 and mobile repair
+
+- Confirmed prior Level 3 roller started at tile 10, triggered only at tile 14, and crawled toward the tile-31 gate; no switch existed. The apparent blocked-wall defect was caused by slow, unexplained gate timing.
+- Moved roller to tile 19 and trigger to tile 22, preserved the gate at tile 31 and moved blink hazards away from the waiting area to tiles 14–15. The gate now displays a matching impact symbol.
+- A scripted **actual main.js physics** route successfully reached the exit: cross the blink hazard with a jump, approach the wall, wait/jump the ball, let the ball hit the gate, then jump the final spike. The simulation recorded gate opening near 5.8s and level completion near 7.87s. This is an automated route, **not** a human playthrough.
+- Fixed a media-query landscape width cap that had reduced the playable canvas to about 1.78 times the available vertical dimension. Gameplay now uses the available width; canvas backing geometry continues adjusting to the displayed ratio.
+- Touch controls now use flex centering, zero padding, consistent icon font/line-height, 56×52px landscape targets, and safe-area-aware edge placement.
+- Added progressive forward visibility (535 world units plus a gradient) to avoid showing most of a short level at once on very wide viewports. Obstacle information should appear well ahead of physical contact; it still requires mobile-device evaluation.
+- Updated asset version query values so browsers request fresh CSS and JavaScript.
+- Added `tests/engine-level3.test.js` to execute the live engine's fixed-step movement and validate a successful route; `tests/level3.test.js` covers deterministic ball/gate models and waiting-area geometry.
+- Existing first-10 and levels 11–60 human playthroughs, mobile screenshots and GitHub Pages production verification remain unconfirmed. Do not describe this as complete game validation.
